@@ -1,0 +1,224 @@
+.app {
+  padding: 100px 0;
+  background: var(--white);
+  position: relative;
+  overflow: hidden;
+}
+
+.app__bg {
+  position: absolute;
+  inset: 0;
+  /* background: radial-gradient(ellipse at 80% 50%, var(--blue-pale) 0%, transparent 60%); */
+  background: radial-gradient(ellipse at 80% 50%, rgba(232,240,255,0.25) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.app__inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+}
+
+/* ─── Phone mockup ───────────────────────────────────────────────── */
+.app__visual {
+  display: flex;
+  justify-content: center;
+  position: relative;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity .7s, transform .7s;
+}
+.app__visual.visible { opacity: 1; transform: none; }
+
+.app__phone {
+  width: 260px;
+  background: var(--navy);
+  border-radius: 40px;
+  padding: 16px;
+  box-shadow: 0 32px 80px rgba(13,17,87,.35), 0 8px 24px rgba(13,17,87,.2);
+  position: relative;
+  z-index: 1;
+  animation: float 4.5s ease-in-out infinite;
+}
+
+.app__phone-screen {
+  background: white;
+  border-radius: 28px;
+  overflow: hidden;
+  min-height: 480px;
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.app__mock-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--navy);
+}
+.app__mock-pill {
+  font-size: 10px;
+  font-weight: 700;
+  background: #dcfce7;
+  color: #16a34a;
+  padding: 3px 8px;
+  border-radius: 100px;
+}
+
+.app__mock-card {
+  background: var(--blue-pale);
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.app__mock-bar {
+  height: 6px;
+  background: var(--gray-200);
+  border-radius: 3px;
+  margin: 6px 0 4px;
+  overflow: hidden;
+}
+.app__mock-fill {
+  height: 100%;
+  background: var(--blue);
+  border-radius: 3px;
+}
+
+.app__mock-updates {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.app__mock-update {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--gray-50);
+  border-radius: 8px;
+  font-size: 12px;
+  color: var(--gray-600);
+  border-left: 2px solid var(--gray-200);
+}
+.app__mock-update.active {
+  background: #fef3c7;
+  border-left-color: #f59e0b;
+  color: #92400e;
+}
+
+.app__mock-btn {
+  background: var(--blue);
+  color: white;
+  text-align: center;
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-top: auto;
+}
+
+.app__phone-glow {
+  position: absolute;
+  bottom: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 80px;
+  background: var(--blue);
+  filter: blur(40px);
+  opacity: .25;
+  border-radius: 50%;
+}
+
+/* ─── Content ────────────────────────────────────────────────────── */
+.app__content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity .7s .15s, transform .7s .15s;
+}
+.app__content.visible { opacity: 1; transform: none; }
+
+.app__features {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 4px;
+}
+.app__features li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  color: #1a1a1a;
+  font-weight: 600;
+}
+
+/* Make section title and subtitle bolder and darker for this section */
+.app__content .section-title {
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: #0d1157;
+  line-height: 1.1;
+}
+.app__content .section-subtitle {
+  font-size: 1.15rem;
+  color: #222b45;
+  margin-top: 10px;
+  max-width: 500px;
+  font-weight: 600;
+}
+.app__feat-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+/* Store buttons */
+.app__store-btns { display: flex; gap: 14px; flex-wrap: wrap; }
+
+.app__store-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--navy);
+  color: var(--white);
+  padding: 12px 22px;
+  border-radius: var(--radius-md);
+  transition: transform .2s, background .2s;
+  border: 2px solid transparent;
+}
+.app__store-btn:hover {
+  transform: translateY(-3px);
+  background: var(--navy-mid);
+}
+.app__store-btn div { display: flex; flex-direction: column; }
+.app__store-btn span { font-size: 11px; color: rgba(255,255,255,.6); }
+.app__store-btn strong { font-size: 15px; line-height: 1.2; }
+
+.app__coming {
+  font-size: 13px;
+  color: var(--gray-400);
+  padding: 12px 16px;
+  background: var(--blue-pale);
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--blue);
+}
+
+@media (max-width: 900px) {
+  .app__inner { grid-template-columns: 1fr; }
+  .app__visual { display: none; }
+}
+@media (max-width: 480px) {
+  .app__features { grid-template-columns: 1fr; }
+  .app__store-btns { flex-direction: column; }
+}

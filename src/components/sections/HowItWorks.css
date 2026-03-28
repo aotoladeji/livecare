@@ -1,0 +1,136 @@
+.how {
+  padding: 100px 0;
+  background: var(--white);
+}
+
+.how__header {
+  text-align: center;
+  max-width: 560px;
+  margin: 0 auto 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity .6s, transform .6s;
+}
+.how__header.visible { opacity: 1; transform: none; }
+
+/* ─── Steps ──────────────────────────────────────────────────────── */
+.how__steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  position: relative;
+  margin-bottom: 64px;
+}
+
+.how__step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 40px 24px;
+  position: relative;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity .6s ease, transform .6s ease;
+}
+.how__step.visible { opacity: 1; transform: none; }
+
+/* Connector line between steps */
+.how__connector {
+  position: absolute;
+  top: 52px;
+  right: -50%;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--blue) 0%, var(--blue-light) 100%);
+  z-index: 0;
+}
+
+.how__step-num {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  color: var(--blue);
+  background: var(--blue-pale);
+  padding: 4px 10px;
+  border-radius: 100px;
+  margin-bottom: 14px;
+  z-index: 1;
+}
+
+.how__step-icon {
+  width: 68px; height: 68px;
+  background: var(--white);
+  border: 2px solid var(--blue);
+  border-radius: 50%;
+  font-size: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-blue);
+  z-index: 1;
+  transition: transform .25s;
+}
+.how__step:hover .how__step-icon { transform: scale(1.1); }
+
+.how__step h3 {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 10px;
+}
+
+.how__step p {
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--gray-600);
+  margin-bottom: 12px;
+}
+
+.how__step-detail {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--blue);
+  background: var(--blue-pale);
+  padding: 5px 12px;
+  border-radius: 100px;
+}
+
+/* ─── CTA strip ──────────────────────────────────────────────────── */
+.how__cta-strip {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
+  border-radius: var(--radius-lg);
+  padding: 40px 48px;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity .6s .3s ease, transform .6s .3s ease;
+}
+.how__cta-strip.visible { opacity: 1; transform: none; }
+
+.how__cta-strip-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+.how__cta-strip h3 { font-size: 22px; font-weight: 700; color: var(--white); margin-bottom: 6px; }
+.how__cta-strip p  { font-size: 15px; color: rgba(255,255,255,.65); }
+.how__cta-btns { display: flex; gap: 12px; flex-shrink: 0; }
+
+@media (max-width: 900px) {
+  .how__steps { grid-template-columns: 1fr 1fr; }
+  .how__connector { display: none; }
+}
+@media (max-width: 560px) {
+  .how__steps { grid-template-columns: 1fr; }
+  .how__cta-strip { padding: 28px 24px; }
+  .how__cta-strip-inner { flex-direction: column; align-items: flex-start; }
+  .how__cta-btns { flex-direction: column; width: 100%; }
+  .how__cta-btns .btn { justify-content: center; }
+}

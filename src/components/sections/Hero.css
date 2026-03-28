@@ -1,0 +1,271 @@
+.hero {
+  position: relative;
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 50%, #1e3a8a 100%);
+  padding: calc(var(--nav-h) + 60px) 0 120px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── Blobs ──────────────────────────────────────────────────────── */
+.hero__blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: .18;
+  pointer-events: none;
+}
+.hero__blob--1 {
+  width: 600px; height: 600px;
+  background: var(--blue);
+  top: -200px; right: -100px;
+  animation: spin-slow 20s linear infinite;
+}
+.hero__blob--2 {
+  width: 400px; height: 400px;
+  background: #6fa0fd;
+  bottom: 0; left: -150px;
+}
+.hero__blob--3 {
+  width: 300px; height: 300px;
+  background: var(--orange);
+  top: 40%; left: 40%;
+  opacity: .08;
+}
+
+/* ─── Layout ─────────────────────────────────────────────────────── */
+.hero__inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 64px;
+  flex: 1;
+}
+
+/* ─── Entrance animation ─────────────────────────────────────────── */
+.hero__animate {
+  opacity: 0;
+  transform: translateY(24px);
+}
+.hero__animate.run {
+  animation: fadeUp .7s ease forwards;
+}
+
+/* ─── Content ────────────────────────────────────────────────────── */
+.hero__content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.hero__heading {
+  font-size: clamp(36px, 5vw, 60px);
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--white);
+  letter-spacing: -.02em;
+}
+.hero__heading span { color: var(--blue-light); }
+
+.hero__sub {
+  font-size: 18px;
+  line-height: 1.7;
+  color: rgba(255,255,255,.75);
+  max-width: 480px;
+}
+
+.hero__actions { display: flex; gap: 16px; flex-wrap: wrap; }
+
+/* ─── Trust bar ──────────────────────────────────────────────────── */
+.hero__trust {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: rgba(255,255,255,.08);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: var(--radius-md);
+  padding: 16px 24px;
+  width: fit-content;
+}
+
+.hero__trust-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.hero__trust-item strong {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--white);
+  line-height: 1;
+}
+.hero__trust-item span {
+  font-size: 11px;
+  color: rgba(255,255,255,.55);
+  white-space: nowrap;
+}
+
+.hero__trust-divider {
+  width: 1px;
+  height: 36px;
+  background: rgba(255,255,255,.15);
+}
+
+/* ─── Visual card ────────────────────────────────────────────────── */
+.hero__visual {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  animation: float 4s ease-in-out infinite;
+}
+
+.hero__card {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.hero__card-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.hero__avatar-group { display: flex; }
+.hero__avatar {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  font-size: 22px;
+  background: var(--blue-pale);
+  border: 2px solid white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: -10px;
+}
+.hero__avatar:first-child { margin-left: 0; }
+
+.hero__card-label { font-size: 11px; color: var(--gray-400); margin-bottom: 2px; }
+.hero__card-value { font-size: 14px; font-weight: 600; color: var(--navy); }
+
+.hero__care-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #16a34a;
+  background: #f0fdf4;
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+}
+
+.hero__status-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #16a34a;
+  position: relative;
+}
+.hero__status-dot::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid #16a34a;
+  opacity: .5;
+  animation: pulse-ring 1.5s ease-out infinite;
+}
+
+/* Timeline */
+.hero__timeline { display: flex; flex-direction: column; gap: 12px; }
+
+.hero__timeline-step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--gray-600);
+}
+
+.hero__timeline-dot {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.hero__timeline-step.done .hero__timeline-dot {
+  background: var(--blue);
+}
+.hero__timeline-step.active .hero__timeline-dot {
+  background: var(--orange);
+}
+.hero__timeline-step.done { color: var(--navy); }
+
+.hero__pulse {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: white;
+}
+
+.hero__pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--gray-600);
+  background: var(--gray-50);
+  border-radius: 100px;
+  padding: 6px 12px;
+  width: fit-content;
+}
+
+/* Floating badge */
+.hero__badge {
+  position: absolute;
+  bottom: -20px;
+  left: -20px;
+  background: white;
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 220px;
+  font-size: 12px;
+}
+.hero__badge span:first-child { font-size: 22px; }
+.hero__badge strong { display: block; color: var(--navy); font-weight: 600; margin-bottom: 2px; }
+.hero__badge span:last-child { color: var(--gray-400); line-height: 1.4; }
+
+/* ─── Wave ────────────────────────────────────────────────────────── */
+.hero__wave {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  line-height: 0;
+}
+.hero__wave svg { width: 100%; height: 80px; }
+
+/* ─── Responsive ─────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .hero__inner { grid-template-columns: 1fr; gap: 48px; }
+  .hero__visual { display: none; }
+  .hero { min-height: auto; padding-bottom: 80px; }
+}
+
+@media (max-width: 480px) {
+  .hero__actions { flex-direction: column; }
+  .hero__actions .btn { width: 100%; justify-content: center; }
+  .hero__trust { flex-wrap: wrap; }
+}

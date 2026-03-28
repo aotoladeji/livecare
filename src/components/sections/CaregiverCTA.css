@@ -1,0 +1,127 @@
+.caregiver-cta {
+  padding: 100px 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.caregiver-cta__bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--navy) 0%, #1e3a8a 100%);
+}
+
+.caregiver-cta__inner {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 80px;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity .7s, transform .7s;
+}
+.caregiver-cta__inner.visible { opacity: 1; transform: none; }
+
+.caregiver-cta__content { display: flex; flex-direction: column; gap: 24px; }
+
+.caregiver-cta__benefits {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.caregiver-cta__benefit {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.caregiver-cta__benefit > span { font-size: 22px; flex-shrink: 0; }
+.caregiver-cta__benefit strong { display: block; font-size: 14px; color: white; margin-bottom: 3px; }
+.caregiver-cta__benefit p { font-size: 13px; color: rgba(255,255,255,.6); line-height: 1.5; }
+
+/* Visual card */
+.caregiver-cta__visual { display: flex; justify-content: center; }
+
+.caregiver-cta__card {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  max-width: 320px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-shadow: var(--shadow-lg);
+  animation: float 4s ease-in-out infinite;
+}
+
+.caregiver-cta__profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.caregiver-cta__avatar {
+  font-size: 36px;
+  width: 52px; height: 52px;
+  background: var(--blue-pale);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.caregiver-cta__profile strong { display: block; font-size: 15px; color: var(--navy); }
+.caregiver-cta__profile span { font-size: 12px; color: var(--gray-400); }
+.caregiver-cta__rating {
+  margin-left: auto;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--navy);
+}
+
+.caregiver-cta__stats-row {
+  display: flex;
+  gap: 0;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.caregiver-cta__mini-stat {
+  flex: 1;
+  text-align: center;
+  padding: 12px 8px;
+  border-right: 1px solid var(--gray-200);
+}
+.caregiver-cta__mini-stat:last-child { border-right: none; }
+.caregiver-cta__mini-stat strong { display: block; font-size: 16px; color: var(--navy); }
+.caregiver-cta__mini-stat span { font-size: 11px; color: var(--gray-400); }
+
+.caregiver-cta__tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.caregiver-cta__tag {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 100px;
+  background: var(--blue-pale);
+  color: var(--blue);
+  font-weight: 500;
+}
+
+.caregiver-cta__badge {
+  font-size: 13px;
+  font-weight: 600;
+  color: #16a34a;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  text-align: center;
+}
+
+@media (max-width: 900px) {
+  .caregiver-cta__inner { grid-template-columns: 1fr; }
+  .caregiver-cta__visual { display: none; }
+}
+@media (max-width: 560px) {
+  .caregiver-cta__benefits { grid-template-columns: 1fr; }
+}
