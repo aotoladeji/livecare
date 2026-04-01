@@ -61,7 +61,7 @@ export default function Footer() {
             <ul className="footer__contact-list">
               <li>
                 <span className="footer__contact-icon">📍</span>
-                <span>Suite 5, Al-Barka Plaza, Favoz Junction, New Bodija, Ibadan 200221, Oyo State, Nigeria</span>
+                <span>Suite 10, Al-Barka Plaza, Favoz Junction, New Bodija, Ibadan 200221, Oyo State, Nigeria</span>
               </li>
               <li>
                 <span className="footer__contact-icon">✉️</span>

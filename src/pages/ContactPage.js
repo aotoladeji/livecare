@@ -15,7 +15,7 @@ const FAQS = [
 const CHANNELS = [
   { icon: '✉️', label: 'Email Us', value: 'hello@livecare.ng', href: 'mailto:hello@livecare.ng', desc: 'We respond within 24 hours' },
   { icon: '📞', label: 'Call Us', value: '+234 907 352 0931', href: 'tel:+2349073520931', desc: 'Mon–Sat, 8am–6pm WAT' },
-  { icon: '📍', label: 'Location', value: 'Suite 5, Al-Barka Plaza, Favoz Junction, New Bodija, Ibadan 200221, Oyo', href: null, desc: 'Serving Ibadan & surroundings' },
+  { icon: '📍', label: 'Location', value: 'Suite 10, Al-Barka Plaza, Favoz Junction, New Bodija, Ibadan 200221, Oyo', href: null, desc: 'Serving Ibadan & surroundings' },
 ];
 
 const INITIAL = { name: '', email: '', phone: '', subject: '', message: '' };

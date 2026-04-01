@@ -91,7 +91,7 @@ export default function AboutPage() {
               <div className="about-contact-chips">
                 <a href="mailto:hello@livecare.ng" className="about-chip">✉️ hello@livecare.ng</a>
                 <a href="tel:+2349073520931" className="about-chip">📞 +234 907 352 0931</a>
-                <span className="about-chip">📍 Suite 5, Al-Barka Plaza, Favoz Junction, New Bodija, Ibadan 200221, Oyo</span>
+                <span className="about-chip">📍 Suite 10, Al-Barka Plaza, Favoz Junction, New Bodija, Ibadan 200221, Oyo</span>
               </div>
             </div>
             <div className="about-map-placeholder">
