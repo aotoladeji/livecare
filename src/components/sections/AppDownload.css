@@ -196,10 +196,21 @@
   border-radius: var(--radius-md);
   transition: transform .2s, background .2s;
   border: 2px solid transparent;
+  cursor: pointer;
 }
 .app__store-btn:hover {
   transform: translateY(-3px);
   background: var(--navy-mid);
+}
+.app__store-btn--disabled,
+.app__store-btn:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+}
+.app__store-btn--disabled:hover,
+.app__store-btn:disabled:hover {
+  transform: none;
+  background: var(--navy);
 }
 .app__store-btn div { display: flex; flex-direction: column; }
 .app__store-btn span { font-size: 11px; color: rgba(255,255,255,.6); }

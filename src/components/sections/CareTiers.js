@@ -8,6 +8,7 @@ const BASIC_SERVICES = [
   { icon: '🍽️', label: 'Feeding & Nutrition Assistance' },
   { icon: '🚶', label: 'Mobility & Transfers' },
   { icon: '💊', label: 'Medication Reminders' },
+  { icon: '🩺', label: 'Health Monitoring' },
   { icon: '🏠', label: 'Light Household Support' },
 ];
 

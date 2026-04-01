@@ -39,6 +39,7 @@ export default function Footer() {
               <SocialIcon href="#" label="Instagram" icon={<InstagramIcon />} />
               <SocialIcon href="#" label="Facebook" icon={<FacebookIcon />} />
               <SocialIcon href="#" label="LinkedIn" icon={<LinkedInIcon />} />
+              <SocialIcon href="#" label="TikTok" icon={<TikTokIcon />} />
             </div>
           </div>
 
@@ -60,7 +61,7 @@ export default function Footer() {
             <ul className="footer__contact-list">
               <li>
                 <span className="footer__contact-icon">📍</span>
-                <span>Ibadan, Nigeria</span>
+                <span>Suite 5, Al-Barka Plaza, Favoz Junction, New Bodija, Ibadan 200221, Oyo State, Nigeria</span>
               </li>
               <li>
                 <span className="footer__contact-icon">✉️</span>
@@ -68,7 +69,7 @@ export default function Footer() {
               </li>
               <li>
                 <span className="footer__contact-icon">📞</span>
-                <a href="tel:+2340000000000" className="footer__link">+234 000 000 0000</a>
+                <a href="tel:+2349073520931" className="footer__link">+234 907 352 0931</a>
               </li>
             </ul>
           </div>
@@ -106,4 +107,7 @@ function FacebookIcon() {
 }
 function LinkedInIcon() {
   return <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>;
+}
+function TikTokIcon() {
+  return <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.19v13.08a2.9 2.9 0 11-2-2.75V9.09a6.1 6.1 0 101.99 11.87A6.1 6.1 0 0015.8 15V9.73a8.02 8.02 0 004.69 1.5V8.04c-.31 0-.61-.05-.9-.14z"/></svg>;
 }

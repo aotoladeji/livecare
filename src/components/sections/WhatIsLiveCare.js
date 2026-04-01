@@ -24,7 +24,7 @@ export default function WhatIsLiveCare() {
               reliable, and accessible
             </h2>
             <p className="section-subtitle" style={{ marginTop: 16 }}>
-              LiveCare is a structured home care service that provides reliable elderly and
+              We ara a structured home care service that provides reliable elderly and
               assisted living support. We combine trained caregivers, real-time care monitoring,
               and coordinated support to ensure consistent and dignified care.
             </p>

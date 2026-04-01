@@ -12,7 +12,7 @@ const STEPS = [
 
 const BENEFITS = [
   { icon: '💰', title: 'Reliable Income', desc: 'Transparent, on-time payments with no hidden deductions. Know exactly what you earn.' },
-  { icon: '📅', title: 'Flexible Scheduling', desc: 'Choose shifts that work for your lifestyle. Full-time, part-time, or weekend options available.' },
+  { icon: '📅', title: 'Flexible Scheduling', desc: 'Choose work hours that fit your schedule. Flexible hourly shifts available, with opportunities for part-time, extended, and weekend care.' },
   { icon: '📚', title: 'Free Training', desc: 'Access professional development training at no cost to you — grow your skills while you earn.' },
   { icon: '🏅', title: 'Build Your Profile', desc: 'Build a verified track record of sessions, ratings, and skills visible to families.' },
   { icon: '🤝', title: 'Ongoing Support', desc: 'Our care coordination team is always available to support you through any challenges.' },
@@ -20,7 +20,7 @@ const BENEFITS = [
 ];
 
 const REQUIREMENTS = [
-  'At least 18 years of age',
+  'At least 21 years of age',
   'Valid government-issued ID',
   'Passion for caring for others',
   'Basic literacy and communication skills',
@@ -34,7 +34,7 @@ const FAQS = [
   { q: 'Do I need formal qualifications to apply?', a: 'No formal qualifications are required to start. We provide all necessary training. A caring attitude and willingness to learn are the most important qualities we look for.' },
   { q: 'How much will I earn?', a: 'Pay is competitive and based on the type of care provided, session length, and your experience level. Detailed rates are shared during the onboarding process.' },
   { q: 'How soon can I start working?', a: 'Once your background check is complete and you\'ve finished training, you can typically begin receiving placements within 1–2 weeks of applying.' },
-  { q: 'What areas do you currently operate in?', a: 'We\'re launching in Ibadan, Oyo State first. If you\'re based nearby, apply now and we\'ll confirm availability in your area.' },
+  { q: 'What areas do you currently operate in?', a: 'We\'re launching in Ibadan, Oyo State first. We plan to expand into other cities in the near future!' },
   { q: 'What support will I receive during sessions?', a: 'Our care coordination team is reachable by phone throughout every session. You\'ll never be left to handle a difficult situation alone.' },
 ];
 
@@ -125,20 +125,6 @@ export default function CaregiverPage() {
                 </li>
               ))}
             </ul>
-
-            {/* Testimonial */}
-            <div className="cg-testimonial">
-              <p className="cg-testimonial__quote">
-                "LiveCare gave me structure and purpose. I went from informal care work to a real career with training and consistent income."
-              </p>
-              <div className="cg-testimonial__author">
-                <div className="cg-testimonial__avatar">N</div>
-                <div>
-                  <strong>Ngozi A.</strong>
-                  <span>LiveCare Caregiver · Ibadan</span>
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* Form */}

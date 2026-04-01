@@ -12,10 +12,9 @@ const REASONS = [
 ];
 
 const STATS = [
-  { value: '500+', label: 'Caregivers Ready' },
+  { value: '100%', label: 'Verified Caregivers Ready' },
   { value: '24/7', label: 'Support Availability' },
-  { value: '100%', label: 'Background Checked' },
-  { value: '4.9★', label: 'Average Rating' },
+  { value: 'Top ★', label: 'Rated' },
 ];
 
 export default function WhyChoose() {
@@ -57,26 +56,6 @@ export default function WhyChoose() {
               <div>
                 <h4>{title}</h4>
                 <p>{desc}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Testimonial strip */}
-        <div className={`why__testimonials ${inView ? 'visible' : ''}`}>
-          {[
-            { quote: 'LiveCare gave us peace of mind. Knowing my mother had someone trained and caring for her every day changed everything.', name: 'Adaeze O.', role: 'Daughter, Ibadan' },
-            { quote: 'The real-time updates are incredible. I always know exactly how my father\'s sessions are going, even when I\'m at work.', name: 'Emeka T.', role: 'Son, Lagos' },
-            { quote: 'Professional, warm, and incredibly organised. The caregiver assigned to us was outstanding.', name: 'Bisi A.', role: 'Wife, Ibadan' },
-          ].map(({ quote, name, role }, i) => (
-            <div key={i} className="why__testimonial">
-              <p className="why__quote">"{quote}"</p>
-              <div className="why__reviewer">
-                <div className="why__avatar">{name[0]}</div>
-                <div>
-                  <strong>{name}</strong>
-                  <span>{role}</span>
-                </div>
               </div>
             </div>
           ))}

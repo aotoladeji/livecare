@@ -63,7 +63,7 @@ export default function WaitlistForm() {
                 <span key={i} style={{ zIndex: 4-i }}>{e}</span>
               ))}
             </div>
-            <p><strong>200+ families</strong> already on the waitlist</p>
+            <p><strong>10+ families</strong> already on the waitlist</p>
           </div>
         </div>
 

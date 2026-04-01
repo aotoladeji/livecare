@@ -14,8 +14,8 @@ const FAQS = [
 
 const CHANNELS = [
   { icon: '✉️', label: 'Email Us', value: 'hello@livecare.ng', href: 'mailto:hello@livecare.ng', desc: 'We respond within 24 hours' },
-  { icon: '📞', label: 'Call Us', value: '+234 000 000 0000', href: 'tel:+2340000000000', desc: 'Mon–Sat, 8am–6pm WAT' },
-  { icon: '📍', label: 'Location', value: 'Ibadan, Oyo State, Nigeria', href: null, desc: 'Serving Ibadan & surroundings' },
+  { icon: '📞', label: 'Call Us', value: '+234 907 352 0931', href: 'tel:+2349073520931', desc: 'Mon–Sat, 8am–6pm WAT' },
+  { icon: '📍', label: 'Location', value: 'Suite 5, Al-Barka Plaza, Favoz Junction, New Bodija, Ibadan 200221, Oyo', href: null, desc: 'Serving Ibadan & surroundings' },
 ];
 
 const INITIAL = { name: '', email: '', phone: '', subject: '', message: '' };
@@ -82,6 +82,7 @@ export default function ContactPage() {
                   { label: 'Instagram', icon: '📷', href: '#' },
                   { label: 'Facebook', icon: 'f', href: '#' },
                   { label: 'LinkedIn', icon: 'in', href: '#' },
+                  { label: 'TikTok', icon: '♪', href: '#' },
                 ].map(({ label, icon, href }, i) => (
                   <a key={i} href={href} aria-label={label} className="contact-social__btn">{icon}</a>
                 ))}
@@ -122,7 +123,7 @@ export default function ContactPage() {
                 </div>
 
                 <div className="contact-form__row">
-                  <ContactField label="Phone Number (optional)" name="phone" type="tel" placeholder="08012345678"
+                  <ContactField label="Phone Number (optional)" name="phone" type="tel" placeholder="0"
                     value={form.phone} onChange={handleChange} />
                   <div className="contact-field">
                     <label>Subject</label>

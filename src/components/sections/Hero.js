@@ -27,8 +27,8 @@ export default function Hero() {
           <span className="section-tag hero__animate">🏥 Home Care, Reimagined</span>
 
           <h1 className="hero__heading hero__animate">
-            Trusted Care,<br />
-            <span>Till Infinity</span>
+            Smarter Care,<br />
+            <span>Trusted Support</span>
           </h1>
 
           <p className="hero__sub hero__animate">
@@ -37,9 +37,6 @@ export default function Hero() {
           </p>
 
           <div className="hero__actions hero__animate">
-            <a href="#app" className="btn btn-primary btn-lg">
-              <AppIcon /> Download App
-            </a>
             <a href="#waitlist" className="btn btn-outline btn-lg">
               Join Waitlist
             </a>
@@ -48,7 +45,7 @@ export default function Hero() {
           {/* Trust bar */}
           <div className="hero__trust hero__animate">
             <div className="hero__trust-item">
-              <strong>500+</strong>
+              <strong>100%</strong>
               <span>Verified Caregivers</span>
             </div>
             <div className="hero__trust-divider" />
@@ -56,11 +53,7 @@ export default function Hero() {
               <strong>24/7</strong>
               <span>Support Available</span>
             </div>
-            <div className="hero__trust-divider" />
-            <div className="hero__trust-item">
-              <strong>100%</strong>
-              <span>Background Checked</span>
-            </div>
+            
           </div>
         </div>
 
