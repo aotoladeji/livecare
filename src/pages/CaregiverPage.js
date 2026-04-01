@@ -13,7 +13,8 @@ const STEPS = [
 const BENEFITS = [
   { icon: '💰', title: 'Reliable Income', desc: 'Transparent, on-time payments with no hidden deductions. Know exactly what you earn.' },
   { icon: '📅', title: 'Flexible Scheduling', desc: 'Choose work hours that fit your schedule. Flexible hourly shifts available, with opportunities for part-time, extended, and weekend care.' },
-  { icon: '📚', title: 'Free Training', desc: 'Access professional development training at no cost to you — grow your skills while you earn.' },
+  { icon: '📚', title: 'Training', desc: 'Access high-quality, affordable training designed to help you grow your caregiving skills while you earn.' },
+  { icon: '📜', title: 'Certificate', desc: 'Earn professionally recognized certifications aligned with global caregiving standards' },
   { icon: '🏅', title: 'Build Your Profile', desc: 'Build a verified track record of sessions, ratings, and skills visible to families.' },
   { icon: '🤝', title: 'Ongoing Support', desc: 'Our care coordination team is always available to support you through any challenges.' },
   { icon: '🚀', title: 'Career Growth', desc: 'Progress from basic care to specialist roles as you gain experience and qualifications.' },
