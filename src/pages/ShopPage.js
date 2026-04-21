@@ -162,8 +162,7 @@ function formatNaira(amount) {
 }
 
 function getProductImageUrl(product) {
-  const query = `${product.name}, ${product.category}, medical equipment`;
-  return `https://source.unsplash.com/800x600/?${encodeURIComponent(query)}`;
+  return `https://picsum.photos/seed/livecare-product-${product.id}/800/600`;
 }
 
 /* ─── Order Modal ───────────────────────────────────────────── */
