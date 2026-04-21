@@ -161,6 +161,11 @@ function formatNaira(amount) {
   return '₦' + amount.toLocaleString('en-NG');
 }
 
+function getProductImageUrl(product) {
+  const query = `${product.name}, ${product.category}, medical equipment`;
+  return `https://source.unsplash.com/800x600/?${encodeURIComponent(query)}`;
+}
+
 /* ─── Order Modal ───────────────────────────────────────────── */
 function OrderModal({ product, onClose }) {
   if (!product) return null;
@@ -168,7 +173,19 @@ function OrderModal({ product, onClose }) {
     <div className="shop-modal__backdrop" onClick={onClose}>
       <div className="shop-modal__box" onClick={e => e.stopPropagation()}>
         <button className="shop-modal__close" onClick={onClose} aria-label="Close">✕</button>
-        <div className="shop-modal__icon">{product.icon}</div>
+        <div className="shop-modal__media">
+          <img
+            className="shop-modal__image"
+            src={getProductImageUrl(product)}
+            alt={product.name}
+            loading="lazy"
+            onError={(e) => {
+              e.currentTarget.style.display = 'none';
+              e.currentTarget.nextElementSibling.style.display = 'inline-flex';
+            }}
+          />
+          <span className="shop-modal__fallback">{product.icon}</span>
+        </div>
         <h3 className="shop-modal__name">{product.name}</h3>
         <p className="shop-modal__price">{formatNaira(product.price)}</p>
         <p className="shop-modal__desc">{product.desc}</p>
@@ -200,8 +217,18 @@ function ProductCard({ product, onOrder }) {
   return (
     <div className="shop-card">
       {product.tag && <span className="shop-card__tag">{product.tag}</span>}
-      <div className="shop-card__icon-wrap">
-        <span className="shop-card__icon">{product.icon}</span>
+      <div className="shop-card__media">
+        <img
+          className="shop-card__image"
+          src={getProductImageUrl(product)}
+          alt={product.name}
+          loading="lazy"
+          onError={(e) => {
+            e.currentTarget.style.display = 'none';
+            e.currentTarget.nextElementSibling.style.display = 'inline-flex';
+          }}
+        />
+        <span className="shop-card__fallback">{product.icon}</span>
       </div>
       <div className="shop-card__body">
         <span className="shop-card__category">{product.category}</span>
