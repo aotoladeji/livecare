@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { useInView } from '../hooks/useInView';
+import useInView from '../hooks/useInView';
 import './ShopPage.css';
 
 /* ─── Product catalogue ─────────────────────────────────────── */
