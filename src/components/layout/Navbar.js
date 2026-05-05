@@ -10,6 +10,7 @@ const NAV_LINKS = [
   { label: 'About',      to: '/about' },
   { label: 'Caregivers', to: '/caregivers' },
   { label: 'Contact',    to: '/contact' },
+  { label: 'Admin',      to: '/admin' },
 ];
 
 export default function Navbar() {

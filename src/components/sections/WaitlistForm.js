@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import useInView from '../../hooks/useInView';
+import { addWaitlistEntry } from '../../utils/storage';
 import './WaitlistForm.css';
 
 const INITIAL = { name: '', phone: '', email: '', location: '' };
@@ -32,7 +33,11 @@ export default function WaitlistForm() {
     if (Object.keys(e).length) { setErrors(e); return; }
     setLoading(true);
     // Simulate API call
-    setTimeout(() => { setLoading(false); setSubmitted(true); }, 1400);
+    setTimeout(() => {
+      addWaitlistEntry(form);
+      setLoading(false);
+      setSubmitted(true);
+    }, 1400);
   };
 
   return (

@@ -1,193 +1,106 @@
-import React, { useState, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import useInView from '../hooks/useInView';
+import { CATEGORIES } from '../data/shopProducts';
+import { getShopProducts } from '../utils/storage';
 import './ShopPage.css';
 
-/* ─── Product catalogue ─────────────────────────────────────── */
-const CATEGORIES = ['All', 'Mobility Aids', 'Personal Care', 'Medical Equipment', 'Daily Living'];
-
-const PRODUCTS = [
-  /* Mobility Aids */
-  {
-    id: 1, category: 'Mobility Aids',
-    name: 'Folding Walking Stick',
-    desc: 'Lightweight aluminium, height-adjustable, ergonomic grip. Folds compactly for travel.',
-    price: 8500,
-    icon: '🦯',
-    tag: 'Best Seller',
-  },
-  {
-    id: 2, category: 'Mobility Aids',
-    name: 'Standard Wheelchair',
-    desc: 'Durable steel frame, padded seat & back, removable footrests, 18" seat width.',
-    price: 95000,
-    icon: '♿',
-    tag: 'Popular',
-  },
-  {
-    id: 3, category: 'Mobility Aids',
-    name: 'Rollator Walker',
-    desc: '4-wheeled walker with hand brakes, padded seat and under-seat basket.',
-    price: 52000,
-    icon: '🚶',
-    tag: null,
-  },
-  {
-    id: 4, category: 'Mobility Aids',
-    name: 'Forearm Crutches',
-    desc: 'Adjustable elbow crutches with comfortable arm cuff. Sold as a pair.',
-    price: 14000,
-    icon: '🩼',
-    tag: null,
-  },
-  {
-    id: 5, category: 'Mobility Aids',
-    name: 'Electric Mobility Scooter',
-    desc: 'Rechargeable 3-wheel scooter, 15 km/h max, 25 km range per charge.',
-    price: 320000,
-    icon: '🛵',
-    tag: 'Premium',
-  },
-  /* Personal Care */
-  {
-    id: 6, category: 'Personal Care',
-    name: 'Shower Transfer Bench',
-    desc: 'Adjustable height bath chair with back rest and suction feet for safety.',
-    price: 28000,
-    icon: '🛁',
-    tag: null,
-  },
-  {
-    id: 7, category: 'Personal Care',
-    name: 'Raised Toilet Seat',
-    desc: 'Adds 4″ height, supports up to 135 kg, easy clip-on installation.',
-    price: 12500,
-    icon: '🚽',
-    tag: null,
-  },
-  {
-    id: 8, category: 'Personal Care',
-    name: 'Adult Incontinence Briefs (Pack of 10)',
-    desc: 'Soft, breathable, leak-proof. Available in M, L, XL.',
-    price: 6500,
-    icon: '🩲',
-    tag: 'Best Seller',
-  },
-  {
-    id: 9, category: 'Personal Care',
-    name: 'Long-Handled Bath Sponge',
-    desc: '65 cm handle, soft sponge head. Allows easy back & feet washing.',
-    price: 2800,
-    icon: '🧽',
-    tag: null,
-  },
-  /* Medical Equipment */
-  {
-    id: 10, category: 'Medical Equipment',
-    name: 'Digital Blood Pressure Monitor',
-    desc: 'Upper-arm cuff, memory for 60 readings, irregular heartbeat alert.',
-    price: 21000,
-    icon: '💊',
-    tag: 'Popular',
-  },
-  {
-    id: 11, category: 'Medical Equipment',
-    name: 'Pulse Oximeter',
-    desc: 'Fingertip SpO₂ & pulse rate display, auto power-off, includes lanyard.',
-    price: 7500,
-    icon: '🩺',
-    tag: null,
-  },
-  {
-    id: 12, category: 'Medical Equipment',
-    name: 'Weekly Pill Organiser',
-    desc: '7-day AM/PM compartments, large-print labels, easy-open lids.',
-    price: 3200,
-    icon: '💉',
-    tag: null,
-  },
-  {
-    id: 13, category: 'Medical Equipment',
-    name: 'Digital Thermometer',
-    desc: 'Fast 10-second reading, fever alert, flexible tip for comfort.',
-    price: 4500,
-    icon: '🌡️',
-    tag: null,
-  },
-  /* Daily Living */
-  {
-    id: 14, category: 'Daily Living',
-    name: 'Anti-Slip Bathroom Mat',
-    desc: 'Suction-cup base, machine washable, 60 × 90 cm, multiple colours.',
-    price: 5500,
-    icon: '🛟',
-    tag: null,
-  },
-  {
-    id: 15, category: 'Daily Living',
-    name: 'Grab Bar (Stainless Steel)',
-    desc: '45 cm wall-mounted safety rail, 135 kg capacity, rust-proof finish.',
-    price: 9800,
-    icon: '🔩',
-    tag: null,
-  },
-  {
-    id: 16, category: 'Daily Living',
-    name: 'Large-Print Playing Cards',
-    desc: 'High-contrast extra-large font deck, great for low-vision users.',
-    price: 2200,
-    icon: '🃏',
-    tag: null,
-  },
-  {
-    id: 17, category: 'Daily Living',
-    name: 'Talking Alarm Clock',
-    desc: 'Announces time loudly at the press of a button, loud alarm, night light.',
-    price: 11500,
-    icon: '⏰',
-    tag: null,
-  },
-  {
-    id: 18, category: 'Daily Living',
-    name: 'Lap Tray Table',
-    desc: 'Cushioned bean-bag base, solid wood surface. Perfect for bed or sofa use.',
-    price: 8200,
-    icon: '🍽️',
-    tag: null,
-  },
-];
-
 function formatNaira(amount) {
+  if (typeof amount !== 'number' || Number.isNaN(amount)) {
+    return 'Price on request';
+  }
   return '₦' + amount.toLocaleString('en-NG');
 }
 
 /* ─── Order Modal ───────────────────────────────────────────── */
-function OrderModal({ product, onClose }) {
+function ProductModal({ product, onClose }) {
+  const [activeImage, setActiveImage] = useState(0);
+
+  useEffect(() => {
+    setActiveImage(0);
+  }, [product?.id]);
+
+  useEffect(() => {
+    const onEsc = (event) => {
+      if (event.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onEsc);
+    return () => window.removeEventListener('keydown', onEsc);
+  }, [onClose]);
+
   if (!product) return null;
+
+  const gallery = Array.isArray(product.images) ? product.images : [];
+  const hasImages = gallery.length > 0;
+
+  const goPrev = () => {
+    if (gallery.length < 2) return;
+    setActiveImage((i) => (i === 0 ? gallery.length - 1 : i - 1));
+  };
+
+  const goNext = () => {
+    if (gallery.length < 2) return;
+    setActiveImage((i) => (i === gallery.length - 1 ? 0 : i + 1));
+  };
+
   return (
     <div className="shop-modal__backdrop" onClick={onClose}>
       <div className="shop-modal__box" onClick={e => e.stopPropagation()}>
         <button className="shop-modal__close" onClick={onClose} aria-label="Close">✕</button>
-        <div className="shop-modal__icon">{product.icon}</div>
+        <div className="shop-modal__viewer">
+          {hasImages ? (
+            <img
+              src={gallery[activeImage]}
+              alt={`${product.name} view ${activeImage + 1}`}
+              className="shop-modal__image"
+            />
+          ) : (
+            <div className="shop-modal__icon">{product.icon}</div>
+          )}
+          {gallery.length > 1 && (
+            <>
+              <button className="shop-modal__nav shop-modal__nav--prev" onClick={goPrev} aria-label="Previous image">‹</button>
+              <button className="shop-modal__nav shop-modal__nav--next" onClick={goNext} aria-label="Next image">›</button>
+            </>
+          )}
+        </div>
+        {gallery.length > 1 && (
+          <div className="shop-modal__thumbs">
+            {gallery.map((src, index) => (
+              <button
+                key={`${product.id}_${index}`}
+                className={`shop-modal__thumb ${index === activeImage ? 'active' : ''}`}
+                onClick={() => setActiveImage(index)}
+                aria-label={`View image ${index + 1}`}
+              >
+                <img src={src} alt={`${product.name} thumbnail ${index + 1}`} />
+              </button>
+            ))}
+          </div>
+        )}
         <h3 className="shop-modal__name">{product.name}</h3>
+        {product.modelName && <p className="shop-modal__model">Model: {product.modelName}</p>}
+        <p className="shop-modal__availability">Availability: {product.availability || 'In stock'}</p>
         <p className="shop-modal__price">{formatNaira(product.price)}</p>
         <p className="shop-modal__desc">{product.desc}</p>
         <p className="shop-modal__note">
           To place an order, call or message us and we'll confirm availability and delivery to your location.
         </p>
         <div className="shop-modal__actions">
-          <a
-            href="tel:+2349073520931"
+          <Link
+            to="/payment"
+            state={{ product }}
             className="btn btn-primary"
+            onClick={onClose}
           >
-            📞 Call to Order
-          </a>
+            Order Now
+          </Link>
           <Link
             to="/contact"
             className="btn btn-outline"
             onClick={onClose}
           >
-            Send a Message
+            📞 Call to Order
           </Link>
         </div>
       </div>
@@ -196,23 +109,45 @@ function OrderModal({ product, onClose }) {
 }
 
 /* ─── Product Card ──────────────────────────────────────────── */
-function ProductCard({ product, onOrder }) {
+function ProductCard({ product, onOrder, onView }) {
+  const coverImage = product.images?.[0];
+  const [detailsOpen, setDetailsOpen] = useState(false);
+
   return (
     <div className="shop-card">
       {product.tag && <span className="shop-card__tag">{product.tag}</span>}
       <div className="shop-card__icon-wrap">
-        <span className="shop-card__icon">{product.icon}</span>
+        {coverImage ? (
+          <img className="shop-card__image" src={coverImage} alt={product.name} />
+        ) : (
+          <span className="shop-card__icon">{product.icon}</span>
+        )}
       </div>
       <div className="shop-card__body">
         <span className="shop-card__category">{product.category}</span>
         <h3 className="shop-card__name">{product.name}</h3>
-        <p className="shop-card__desc">{product.desc}</p>
+        {product.modelName && <p className="shop-card__model">{product.modelName}</p>}
+        <p className="shop-card__availability">{product.availability || 'In stock'}</p>
+        <button
+          type="button"
+          className="shop-card__details-toggle"
+          onClick={() => setDetailsOpen((value) => !value)}
+          aria-expanded={detailsOpen}
+        >
+          {detailsOpen ? 'Hide details' : 'View details'}
+        </button>
+        {detailsOpen && <p className="shop-card__desc">{product.desc}</p>}
       </div>
       <div className="shop-card__footer">
         <span className="shop-card__price">{formatNaira(product.price)}</span>
-        <button className="btn btn-primary btn-sm" onClick={() => onOrder(product)}>
-          Order Now
-        </button>
+        <div className="shop-card__actions">
+          <button className="btn btn-secondary btn-sm" onClick={() => onOrder(product)}>
+            Order Now
+          </button>
+          <button className="btn btn-primary btn-sm" onClick={() => onView(product)}>
+            View Item
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -220,21 +155,33 @@ function ProductCard({ product, onOrder }) {
 
 /* ─── Page ──────────────────────────────────────────────────── */
 export default function ShopPage() {
+  const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState('All');
   const [search, setSearch]                 = useState('');
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [products, setProducts] = useState(() => getShopProducts());
 
   const [heroRef, heroVisible]   = useInView({ threshold: 0.1 });
   const [gridRef, gridVisible]   = useInView({ threshold: 0.05 });
 
+  useEffect(() => {
+    setProducts(getShopProducts());
+  }, []);
+
+  const handleOrderNow = (product) => {
+    navigate('/payment', { state: { product } });
+  };
+
   const filtered = useMemo(() => {
-    return PRODUCTS.filter(p => {
+    return products.filter(p => {
       const matchCat    = activeCategory === 'All' || p.category === activeCategory;
       const matchSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
-                          p.desc.toLowerCase().includes(search.toLowerCase());
+                          p.desc.toLowerCase().includes(search.toLowerCase()) ||
+                          (p.modelName || '').toLowerCase().includes(search.toLowerCase()) ||
+                          (p.availability || '').toLowerCase().includes(search.toLowerCase());
       return matchCat && matchSearch;
     });
-  }, [activeCategory, search]);
+  }, [activeCategory, products, search]);
 
   return (
     <div className="shop-page">
@@ -287,7 +234,12 @@ export default function ShopPage() {
         ) : (
           <div className={`shop-grid ${gridVisible ? 'visible' : ''}`}>
             {filtered.map(product => (
-              <ProductCard key={product.id} product={product} onOrder={setSelectedProduct} />
+              <ProductCard
+                key={product.id}
+                product={product}
+                onOrder={handleOrderNow}
+                onView={setSelectedProduct}
+              />
             ))}
           </div>
         )}
@@ -309,7 +261,7 @@ export default function ShopPage() {
       </section>
 
       {/* ── Order Modal ── */}
-      <OrderModal product={selectedProduct} onClose={() => setSelectedProduct(null)} />
+      <ProductModal product={selectedProduct} onClose={() => setSelectedProduct(null)} />
     </div>
   );
 }
