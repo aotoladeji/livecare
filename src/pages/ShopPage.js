@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import useInView from '../hooks/useInView';
 import { CATEGORIES } from '../data/shopProducts';
-import { getShopProducts } from '../utils/storage';
+import { getAllProductsDB } from '../utils/db';
 import './ShopPage.css';
 
 function formatNaira(amount) {
@@ -159,13 +159,18 @@ export default function ShopPage() {
   const [activeCategory, setActiveCategory] = useState('All');
   const [search, setSearch]                 = useState('');
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [products, setProducts] = useState(() => getShopProducts());
+  const [products, setProducts] = useState([]);
+  const [productsLoading, setProductsLoading] = useState(true);
 
   const [heroRef, heroVisible]   = useInView({ threshold: 0.1 });
   const [gridRef, gridVisible]   = useInView({ threshold: 0.05 });
 
   useEffect(() => {
-    setProducts(getShopProducts());
+    setProductsLoading(true);
+    getAllProductsDB()
+      .then(prods => setProducts(prods))
+      .catch(err => console.error('Failed to load products:', err))
+      .finally(() => setProductsLoading(false));
   }, []);
 
   const handleOrderNow = (product) => {
@@ -226,7 +231,12 @@ export default function ShopPage() {
 
       {/* ── Product Grid ── */}
       <section className="container shop-grid-section" ref={gridRef}>
-        {filtered.length === 0 ? (
+        {productsLoading ? (
+          <div className="shop-empty">
+            <span className="shop-empty__icon">⏳</span>
+            <p>Loading products…</p>
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="shop-empty">
             <span className="shop-empty__icon">🔍</span>
             <p>No products match your search. Try a different keyword or category.</p>

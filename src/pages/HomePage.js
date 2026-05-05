@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import Hero          from '../components/sections/Hero';
 import WhatIsLiveCare from '../components/sections/WhatIsLiveCare';
 import CareTiers     from '../components/sections/CareTiers';
@@ -9,6 +10,18 @@ import WaitlistForm  from '../components/sections/WaitlistForm';
 import CaregiverCTA  from '../components/sections/CaregiverCTA';
 
 export default function HomePage() {
+  const { state } = useLocation();
+
+  useEffect(() => {
+    if (state?.scrollTo === 'waitlist') {
+      const el = document.getElementById('waitlist');
+      if (el) {
+        // Small delay lets the page finish rendering before scrolling
+        setTimeout(() => el.scrollIntoView({ behavior: 'smooth' }), 100);
+      }
+    }
+  }, [state]);
+
   return (
     <>
       <Hero />

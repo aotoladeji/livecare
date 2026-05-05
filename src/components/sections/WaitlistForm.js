@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import useInView from '../../hooks/useInView';
-import { addWaitlistEntry } from '../../utils/storage';
+import { addWaitlistEntryDB, getWaitlistCountDB } from '../../utils/db';
 import './WaitlistForm.css';
 
 const INITIAL = { name: '', phone: '', email: '', location: '' };
@@ -11,6 +11,14 @@ export default function WaitlistForm() {
   const [errors, setErrors]   = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading]  = useState(false);
+  const [submitError, setSubmitError] = useState('');
+  const [waitlistCount, setWaitlistCount] = useState(null);
+
+  useEffect(() => {
+    getWaitlistCountDB()
+      .then(count => setWaitlistCount(count))
+      .catch(() => {}); // fail silently — count display is non-critical
+  }, [submitted]); // refresh count after a new submission
 
   const validate = () => {
     const e = {};
@@ -32,12 +40,17 @@ export default function WaitlistForm() {
     const e = validate();
     if (Object.keys(e).length) { setErrors(e); return; }
     setLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      addWaitlistEntry(form);
-      setLoading(false);
-      setSubmitted(true);
-    }, 1400);
+    setSubmitError('');
+    addWaitlistEntryDB(form)
+      .then(() => {
+        setLoading(false);
+        setSubmitted(true);
+      })
+      .catch((err) => {
+        console.error('Waitlist submission failed:', err);
+        setLoading(false);
+        setSubmitError('Something went wrong. Please check your connection and try again.');
+      });
   };
 
   return (
@@ -68,7 +81,11 @@ export default function WaitlistForm() {
                 <span key={i} style={{ zIndex: 4-i }}>{e}</span>
               ))}
             </div>
-            <p><strong>10+ families</strong> already on the waitlist</p>
+            <p>
+              <strong>
+                {waitlistCount !== null ? `${waitlistCount}+ ${waitlistCount === 1 ? 'family' : 'families'}` : '10+ families'}
+              </strong> already on the waitlist
+            </p>
           </div>
         </div>
 
@@ -102,6 +119,8 @@ export default function WaitlistForm() {
               <button type="submit" className={`btn btn-primary btn-lg waitlist__submit ${loading ? 'loading' : ''}`} disabled={loading}>
                 {loading ? <span className="waitlist__spinner" /> : '🚀 Join the Waitlist'}
               </button>
+
+              {submitError && <p className="waitlist__error waitlist__submit-error">{submitError}</p>}
 
               <p className="waitlist__disclaimer">
                 🔒 Your details are private and will never be shared or sold.

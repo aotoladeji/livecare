@@ -1,13 +1,14 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import { storage } from '../firebase';
 import {
-  addShopProduct,
-  deleteWaitlistEntry,
-  getShopProducts,
-  getWaitlistEntries,
-  isAdminAuthenticated,
-  setAdminAuthenticated,
-  updateProductImages,
-} from '../utils/storage';
+  addCustomProductDB,
+  deleteWaitlistEntryDB,
+  getAllProductsDB,
+  subscribeWaitlist,
+  updateProductImagesDB,
+} from '../utils/db';
+import { isAdminAuthenticated, setAdminAuthenticated } from '../utils/storage';
 import { CATEGORIES } from '../data/shopProducts';
 import './AdminPage.css';
 
@@ -44,12 +45,44 @@ export default function AdminPage() {
   const [credentials, setCredentials] = useState({ username: '', password: '' });
   const [authError, setAuthError] = useState('');
 
-  const [waitlist, setWaitlist] = useState(() => getWaitlistEntries());
-  const [products, setProducts] = useState(() => getShopProducts());
+  const [waitlist, setWaitlist] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [dbLoading, setDbLoading] = useState(false);
+  const [dbError, setDbError] = useState('');
 
   const [draftProduct, setDraftProduct] = useState(EMPTY_PRODUCT);
   const [productError, setProductError] = useState('');
   const [imageDrafts, setImageDrafts] = useState({});
+  const [uploadProgress, setUploadProgress] = useState({});
+  const fileInputRefs = useRef({});
+
+  const loadProducts = useCallback(() => {
+    setDbLoading(true);
+    setDbError('');
+    getAllProductsDB()
+      .then(prods => setProducts(prods))
+      .catch(err => {
+        console.error(err);
+        setDbError('Failed to load products. Check your connection.');
+      })
+      .finally(() => setDbLoading(false));
+  }, []);
+
+  // Real-time waitlist listener — auto-updates when new submissions arrive
+  useEffect(() => {
+    if (!authenticated) return;
+    const unsubscribe = subscribeWaitlist((entries) => {
+      setWaitlist(entries);
+    });
+    return () => unsubscribe();
+  }, [authenticated]);
+
+  // Load products once on login
+  useEffect(() => {
+    if (authenticated) loadProducts();
+  }, [authenticated, loadProducts]);
+
+  const loadData = loadProducts;
 
   const categoriesWithoutAll = useMemo(
     () => CATEGORIES.filter(category => category !== 'All'),
@@ -88,7 +121,6 @@ export default function AdminPage() {
     }
 
     const nextProduct = {
-      id: Date.now(),
       category: draftProduct.category,
       name: draftProduct.name.trim(),
       modelName: draftProduct.modelName.trim() || null,
@@ -100,8 +132,12 @@ export default function AdminPage() {
       images: [],
     };
 
-    const nextProducts = addShopProduct(nextProduct);
-    setProducts(nextProducts);
+    addCustomProductDB(nextProduct)
+      .then(() => loadData())
+      .catch(err => {
+        console.error(err);
+        setProductError('Failed to save product. Try again.');
+      });
     setDraftProduct(EMPTY_PRODUCT);
     setProductError('');
   };
@@ -114,8 +150,9 @@ export default function AdminPage() {
     if (!sanitized) return;
 
     const nextImages = [...(currentProduct.images || []), sanitized];
-    const nextProducts = updateProductImages(productId, nextImages);
-    setProducts(nextProducts);
+    updateProductImagesDB(productId, nextImages)
+      .then(() => loadData())
+      .catch(err => console.error('Image URL save failed:', err));
     setImageDrafts(drafts => ({ ...drafts, [productId]: '' }));
   };
 
@@ -125,16 +162,53 @@ export default function AdminPage() {
   };
 
   const handleImageUpload = (event, productId) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(event.target.files || []);
+    if (files.length === 0) return;
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === 'string') {
-        addImageToProduct(productId, reader.result);
+    const currentProduct = products.find(product => product.id === productId);
+    if (!currentProduct) return;
+
+    setUploadProgress(prev => ({ ...prev, [productId]: { done: 0, total: files.length } }));
+
+    const uploadedUrls = [];
+
+    const uploadNext = (index) => {
+      if (index >= files.length) {
+        // All done
+        const nextImages = [...(currentProduct.images || []), ...uploadedUrls];
+        updateProductImagesDB(productId, nextImages)
+          .then(() => loadData())
+          .catch(err => console.error('Image upload save failed:', err));
+        setUploadProgress(prev => { const s = { ...prev }; delete s[productId]; return s; });
+        if (fileInputRefs.current[productId]) fileInputRefs.current[productId].value = '';
+        return;
       }
+
+      const file = files[index];
+      const storageRef = ref(storage, `products/${productId}/${Date.now()}_${file.name}`);
+      const task = uploadBytesResumable(storageRef, file);
+
+      task.on('state_changed',
+        null,
+        (error) => {
+          console.error('Upload failed:', error);
+          setUploadProgress(prev => { const s = { ...prev }; delete s[productId]; return s; });
+        },
+        () => {
+          getDownloadURL(task.snapshot.ref).then((url) => {
+            uploadedUrls.push(url);
+            setUploadProgress(prev => ({
+              ...prev,
+              [productId]: { done: index + 1, total: files.length },
+            }));
+            uploadNext(index + 1);
+          });
+        }
+      );
     };
-    reader.readAsDataURL(file);
+
+    uploadNext(0);
+    event.target.value = '';
   };
 
   const removeProductImage = (productId, imageIndex) => {
@@ -142,12 +216,15 @@ export default function AdminPage() {
     if (!currentProduct) return;
 
     const nextImages = (currentProduct.images || []).filter((_, index) => index !== imageIndex);
-    const nextProducts = updateProductImages(productId, nextImages);
-    setProducts(nextProducts);
+    updateProductImagesDB(productId, nextImages)
+      .then(() => loadData())
+      .catch(err => console.error('Image removal failed:', err));
   };
 
   const handleDeleteWaitlist = (entryId) => {
-    setWaitlist(deleteWaitlistEntry(entryId));
+    deleteWaitlistEntryDB(entryId)
+      .catch(err => console.error('Delete failed:', err));
+    // The real-time listener will automatically update the waitlist state
   };
 
   if (!authenticated) {
@@ -190,8 +267,15 @@ export default function AdminPage() {
           <h1>LiveCare Admin</h1>
           <p>Manage waitlist submissions and shop product images from one dashboard.</p>
         </div>
-        <button className="btn btn-secondary" onClick={handleLogout}>Log Out</button>
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+          <button className="btn btn-secondary" onClick={loadData} disabled={dbLoading}>
+            {dbLoading ? 'Loading…' : 'Refresh'}
+          </button>
+          <button className="btn btn-secondary" onClick={handleLogout}>Log Out</button>
+        </div>
       </div>
+
+      {dbError && <div className="container"><p className="admin-error">{dbError}</p></div>}
 
       <div className="container admin-stats">
         <div className="admin-stat">
@@ -353,9 +437,21 @@ export default function AdminPage() {
               </form>
 
               <label className="admin-upload">
-                Upload image file
-                <input type="file" accept="image/*" onChange={(event) => handleImageUpload(event, product.id)} />
+                Upload image files
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  ref={el => { fileInputRefs.current[product.id] = el; }}
+                  onChange={(event) => handleImageUpload(event, product.id)}
+                />
               </label>
+
+              {uploadProgress[product.id] && (
+                <p className="admin-upload-progress">
+                  Uploading {uploadProgress[product.id].done} / {uploadProgress[product.id].total}…
+                </p>
+              )}
 
               <div className="admin-gallery-grid">
                 {(product.images || []).length === 0 ? (

@@ -185,6 +185,12 @@
   font-size: 0.85rem;
 }
 
+.admin-upload-progress {
+  font-size: 0.82rem;
+  color: var(--primary, #2563eb);
+  margin-bottom: 10px;
+}
+
 .admin-gallery-grid {
   display: grid;
   gap: 10px;

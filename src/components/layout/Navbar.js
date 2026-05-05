@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, NavLink, useLocation } from 'react-router-dom';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import logo from '../../assets/icons/logo.png';
 import './Navbar.css';
 
@@ -17,8 +17,18 @@ export default function Navbar() {
   const [scrolled, setScrolled]   = useState(false);
   const [menuOpen, setMenuOpen]   = useState(false);
   const { pathname }              = useLocation();
+  const navigate                  = useNavigate();
 
   const isHome = pathname === '/';
+
+  const handleWaitlistClick = () => {
+    setMenuOpen(false);
+    if (isHome) {
+      document.getElementById('waitlist')?.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      navigate('/', { state: { scrollTo: 'waitlist' } });
+    }
+  };
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -53,9 +63,9 @@ export default function Navbar() {
               {label}
             </NavLink>
           ))}
-          <Link to="/#waitlist" className="btn btn-primary btn-sm navbar__cta">
+          <button className="btn btn-primary btn-sm navbar__cta" onClick={handleWaitlistClick}>
             Join Waitlist
-          </Link>
+          </button>
         </nav>
 
         <button
