@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import PageHero from '../components/ui/PageHero';
 import useInView from '../hooks/useInView';
+import { addContactSubmissionDB } from '../utils/db';
 import './ContactPage.css';
 
 const FAQS = [
@@ -34,7 +35,16 @@ export default function ContactPage() {
   const handleSubmit = (e) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => { setLoading(false); setSubmitted(true); }, 1400);
+    addContactSubmissionDB(form)
+      .then(() => {
+        setLoading(false);
+        setSubmitted(true);
+        setForm(INITIAL);
+      })
+      .catch(() => {
+        setLoading(false);
+        alert('Failed to send message. Please try again or call us directly.');
+      });
   };
 
   return (

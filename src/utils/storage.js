@@ -4,6 +4,7 @@ const SHOP_KEY = 'livecare_shop_products';
 const SHOP_VERSION_KEY = 'livecare_shop_products_version';
 const WAITLIST_KEY = 'livecare_waitlist_entries';
 const ADMIN_AUTH_KEY = 'livecare_admin_authenticated';
+const ADMIN_PASSWORD_KEY = 'livecare_admin_password';
 
 function parseJSON(value, fallback) {
   if (!value) return fallback;
@@ -91,4 +92,12 @@ export function setAdminAuthenticated(value) {
     return;
   }
   sessionStorage.removeItem(ADMIN_AUTH_KEY);
+}
+
+export function getAdminPassword() {
+  return localStorage.getItem(ADMIN_PASSWORD_KEY) || '';
+}
+
+export function setAdminPassword(password) {
+  localStorage.setItem(ADMIN_PASSWORD_KEY, password);
 }

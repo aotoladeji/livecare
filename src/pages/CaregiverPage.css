@@ -196,6 +196,16 @@
   min-height: 52px;
 }
 .cg-submit.loading { opacity: .8; pointer-events: none; }
+.cg-submit-error {
+  margin-top: 10px;
+  font-size: 0.85rem;
+  color: #ef4444;
+  text-align: center;
+  padding: 8px 12px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+}
 .cg-spinner {
   width: 20px; height: 20px;
   border: 2px solid rgba(255,255,255,.4);

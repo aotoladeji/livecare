@@ -2,9 +2,11 @@
  * Firestore database utilities for LiveCare.
  *
  * Collections:
- *  - waitlist          : waitlist form submissions
- *  - productImages     : per-product image arrays  { images: [...urls] }
- *  - customProducts    : admin-added products (not in default catalog)
+ *  - waitlist              : waitlist form submissions
+ *  - productImages         : per-product image arrays  { images: [...urls] }
+ *  - customProducts        : admin-added products (not in default catalog)
+ *  - caregiverApplications : caregiver apply form submissions
+ *  - certifiedCaregivers   : caregivers approved/certified by admin
  */
 
 import {
@@ -123,4 +125,122 @@ export async function getAllProductsDB() {
   }));
 
   return [...defaultWithImages, ...customWithImages];
+}
+
+// ─── Caregiver Applications ───────────────────────────────────
+
+export async function addCaregiverApplicationDB(entry) {
+  const docRef = await addDoc(collection(db, 'caregiverApplications'), {
+    ...entry,
+    status: 'pending',
+    submittedAt: serverTimestamp(),
+  });
+  return docRef.id;
+}
+
+export async function deleteCaregiverApplicationDB(id) {
+  await deleteDoc(doc(db, 'caregiverApplications', id));
+}
+
+export function subscribeCaregiverApplications(callback) {
+  const q = query(collection(db, 'caregiverApplications'), orderBy('submittedAt', 'desc'));
+  return onSnapshot(q, (snapshot) => {
+    const entries = snapshot.docs.map(d => ({
+      id: d.id,
+      ...d.data(),
+      submittedAt: d.data().submittedAt?.toDate?.()?.toISOString() ?? new Date().toISOString(),
+    }));
+    callback(entries);
+  });
+}
+
+// ─── Certified Caregivers ─────────────────────────────────────
+
+/**
+ * Certify a caregiver: copies their application data into certifiedCaregivers
+ * and removes them from applications.
+ */
+export async function certifyCaregiverDB(application) {
+  const { id, ...data } = application;
+  await addDoc(collection(db, 'certifiedCaregivers'), {
+    ...data,
+    certifiedAt: serverTimestamp(),
+    originalApplicationId: id,
+  });
+  await deleteDoc(doc(db, 'caregiverApplications', id));
+}
+
+export async function removeCertifiedCaregiverDB(id) {
+  await deleteDoc(doc(db, 'certifiedCaregivers', id));
+}
+
+export function subscribeCertifiedCaregivers(callback) {
+  const q = query(collection(db, 'certifiedCaregivers'), orderBy('certifiedAt', 'desc'));
+  return onSnapshot(q, (snapshot) => {
+    const entries = snapshot.docs.map(d => ({
+      id: d.id,
+      ...d.data(),
+      certifiedAt: d.data().certifiedAt?.toDate?.()?.toISOString() ?? new Date().toISOString(),
+      submittedAt: d.data().submittedAt?.toDate?.()?.toISOString() ?? null,
+    }));
+    callback(entries);
+  });
+}
+
+// ─── Contact Form Submissions ─────────────────────────────────
+
+export async function addContactSubmissionDB(submission) {
+  const docRef = await addDoc(collection(db, 'contacts'), {
+    ...submission,
+    status: 'new',
+    submittedAt: serverTimestamp(),
+  });
+  return docRef.id;
+}
+
+export async function deleteContactSubmissionDB(id) {
+  await deleteDoc(doc(db, 'contacts', id));
+}
+
+export function subscribeContacts(callback) {
+  const q = query(collection(db, 'contacts'), orderBy('submittedAt', 'desc'));
+  return onSnapshot(q, (snapshot) => {
+    const entries = snapshot.docs.map(d => ({
+      id: d.id,
+      ...d.data(),
+      submittedAt: d.data().submittedAt?.toDate?.()?.toISOString() ?? new Date().toISOString(),
+    }));
+    callback(entries);
+  });
+}
+
+// ─── Orders ───────────────────────────────────────────────────
+
+export async function createOrderDB(order) {
+  const docRef = await addDoc(collection(db, 'orders'), {
+    ...order,
+    status: 'pending',
+    createdAt: serverTimestamp(),
+  });
+  return docRef.id;
+}
+
+export async function updateOrderStatusDB(orderId, status) {
+  await setDoc(doc(db, 'orders', orderId), { status }, { merge: true });
+}
+
+export async function deleteOrderDB(orderId) {
+  await deleteDoc(doc(db, 'orders', orderId));
+}
+
+export function subscribeOrders(callback) {
+  const q = query(collection(db, 'orders'), orderBy('createdAt', 'desc'));
+  return onSnapshot(q, (snapshot) => {
+    const entries = snapshot.docs.map(d => ({
+      id: d.id,
+      ...d.data(),
+      createdAt: d.data().createdAt?.toDate?.()?.toISOString() ?? new Date().toISOString(),
+    }));
+    callback(entries);
+  });
 }

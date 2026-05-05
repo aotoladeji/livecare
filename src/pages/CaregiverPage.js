@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import PageHero from '../components/ui/PageHero';
 import useInView from '../hooks/useInView';
+import { addCaregiverApplicationDB } from '../utils/db';
 import './CaregiverPage.css';
 
 const STEPS = [
@@ -50,14 +51,29 @@ export default function CaregiverPage() {
   const [form, setForm] = useState(INITIAL_FORM);
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   const handleChange = ({ target: { name, value } }) =>
     setForm(f => ({ ...f, [name]: value }));
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!form.name.trim() || !form.phone.trim() || !form.email.trim() || !form.location.trim() || !form.experience) {
+      setSubmitError('Please fill in all required fields.');
+      return;
+    }
     setLoading(true);
-    setTimeout(() => { setLoading(false); setSubmitted(true); }, 1500);
+    setSubmitError('');
+    addCaregiverApplicationDB(form)
+      .then(() => {
+        setLoading(false);
+        setSubmitted(true);
+      })
+      .catch((err) => {
+        console.error('Application submission failed:', err);
+        setLoading(false);
+        setSubmitError('Something went wrong. Please check your connection and try again.');
+      });
   };
 
   return (
@@ -180,6 +196,7 @@ export default function CaregiverPage() {
                 <button type="submit" className={`btn btn-primary btn-lg cg-submit ${loading ? 'loading' : ''}`} disabled={loading}>
                   {loading ? <span className="cg-spinner" /> : '🚀 Submit Application'}
                 </button>
+                {submitError && <p className="cg-submit-error">{submitError}</p>}
                 <p className="cg-form__disclaimer">🔒 Your information is safe with us and will never be shared without your consent.</p>
               </form>
             )}

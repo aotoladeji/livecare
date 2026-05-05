@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import './index.css';
 
 import Navbar      from './components/layout/Navbar';
@@ -14,11 +14,14 @@ import AdminPage from './pages/AdminPage';
 import PaymentPage from './pages/PaymentPage';
 import ScrollToTop from './components/ui/ScrollToTop';
 
-export default function App() {
+function AppContent() {
+  const location = useLocation();
+  const isAdmin = location.pathname === '/admin';
+
   return (
-    <Router>
+    <>
       <ScrollToTop />
-      <Navbar />
+      {!isAdmin && <Navbar />}
       <main>
         <Routes>
           <Route path="/"            element={<HomePage />}     />
@@ -31,7 +34,15 @@ export default function App() {
           <Route path="/payment"    element={<PaymentPage />}   />
         </Routes>
       </main>
-      <Footer />
+      {!isAdmin && <Footer />}
+    </>
+  );
+}
+
+export default function App() {
+  return (
+    <Router>
+      <AppContent />
     </Router>
   );
 }
