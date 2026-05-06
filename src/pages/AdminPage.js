@@ -392,14 +392,14 @@ export default function AdminPage() {
         </nav>
 
         <div className="adm-sidebar__footer">
-          <button className="adm-nav-item" onClick={() => setShowChangePassword(true)} title="Change password">
-            <span className="adm-nav-item__icon">🔐</span>
-            <span className="adm-nav-item__label">Change Password</span>
-          </button>
           <button className="adm-nav-item" onClick={() => navigate('/')} title="Back to website">
             <span className="adm-nav-item__icon">🌐</span>
             <span className="adm-nav-item__label">Back to Web</span>
           </button>
+            <button className="adm-nav-item" onClick={() => setShowChangePassword(true)} title="Change password">
+              <span className="adm-nav-item__icon">🔐</span>
+              <span className="adm-nav-item__label">Change Password</span>
+            </button>
           <button className="adm-nav-item adm-nav-item--logout" onClick={handleLogout}>
             <span className="adm-nav-item__icon">🚪</span>
             <span className="adm-nav-item__label">Log Out</span>
