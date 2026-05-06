@@ -1,11 +1,36 @@
 .hero {
   position: relative;
   min-height: 100vh;
-  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 50%, #1e3a8a 100%);
+  background: #0f285e;
   padding: calc(var(--nav-h) + 60px) 0 120px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url('../../assets/hero/hero-1.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  animation: hero-bg-cycle 18s ease-in-out infinite;
+  z-index: 0;
+}
+
+.hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, rgba(11, 31, 74, .82), rgba(28, 76, 162, .68));
+  z-index: 1;
+}
+
+.hero > * {
+  position: relative;
+  z-index: 2;
 }
 
 /* ─── Blobs ──────────────────────────────────────────────────────── */
@@ -268,4 +293,23 @@
   .hero__actions { flex-direction: column; }
   .hero__actions .btn { width: 100%; justify-content: center; }
   .hero__trust { flex-wrap: wrap; }
+}
+
+@keyframes hero-bg-cycle {
+  0%, 30% {
+    background-image: url('../../assets/hero/hero-1.png');
+    transform: scale(1);
+  }
+  33%, 63% {
+    background-image: url('../../assets/hero/hero-2.png');
+    transform: scale(1.03);
+  }
+  66%, 96% {
+    background-image: url('../../assets/hero/hero-3.png');
+    transform: scale(1);
+  }
+  100% {
+    background-image: url('../../assets/hero/hero-1.png');
+    transform: scale(1);
+  }
 }

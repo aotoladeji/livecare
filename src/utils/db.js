@@ -21,6 +21,8 @@ import {
   orderBy,
   onSnapshot,
   getCountFromServer,
+  where,
+  limit,
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import { DEFAULT_PRODUCTS } from '../data/shopProducts';
@@ -28,8 +30,29 @@ import { DEFAULT_PRODUCTS } from '../data/shopProducts';
 // ─── Waitlist ─────────────────────────────────────────────────
 
 export async function addWaitlistEntryDB(entry) {
+  const normalizedEmail = String(entry.email || '').trim().toLowerCase();
+  const normalizedPhone = String(entry.phone || '').replace(/\s+/g, '');
+
+  // Check for duplicates by email or phone before writing.
+  const [existingByEmail, existingByPhone] = await Promise.all([
+    normalizedEmail
+      ? getDocs(query(collection(db, 'waitlist'), where('email', '==', normalizedEmail), limit(1)))
+      : Promise.resolve({ empty: true }),
+    normalizedPhone
+      ? getDocs(query(collection(db, 'waitlist'), where('phone', '==', normalizedPhone), limit(1)))
+      : Promise.resolve({ empty: true }),
+  ]);
+
+  if (!existingByEmail.empty || !existingByPhone.empty) {
+    const error = new Error('Duplicate waitlist entry');
+    error.code = 'DUPLICATE_WAITLIST_ENTRY';
+    throw error;
+  }
+
   const docRef = await addDoc(collection(db, 'waitlist'), {
     ...entry,
+    email: normalizedEmail,
+    phone: normalizedPhone,
     submittedAt: serverTimestamp(),
   });
   return docRef.id;

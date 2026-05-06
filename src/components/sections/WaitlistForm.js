@@ -49,6 +49,10 @@ export default function WaitlistForm() {
       .catch((err) => {
         console.error('Waitlist submission failed:', err);
         setLoading(false);
+        if (err?.code === 'DUPLICATE_WAITLIST_ENTRY') {
+          setSubmitError('This email or phone number is already on the waitlist.');
+          return;
+        }
         setSubmitError('Something went wrong. Please check your connection and try again.');
       });
   };
