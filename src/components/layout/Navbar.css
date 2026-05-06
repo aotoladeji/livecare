@@ -21,7 +21,17 @@
   height: 100%;
 }
 
-.navbar__logo { display: flex; align-items: center; }
+.navbar__logo {
+  display: flex;
+  align-items: center;
+}
+
+.navbar__logo-img {
+  display: block;
+  height: 80px;
+  width: 200px;
+  max-width: min(240px, 38vw);
+}
 
 /* ─── Links ──────────────────────────────────────────────────────── */
 .navbar__links {
@@ -87,6 +97,11 @@
 
 /* ─── Mobile ─────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
+  .navbar__logo-img {
+    height: 52px;
+    max-width: 200px;
+  }
+
   .navbar__hamburger { display: flex; }
   .navbar__overlay { display: block; }
 

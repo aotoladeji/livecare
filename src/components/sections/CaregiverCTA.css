@@ -7,7 +7,9 @@
 .caregiver-cta__bg {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, var(--navy) 0%, #1e3a8a 100%);
+  background:
+    linear-gradient(135deg, rgba(9, 30, 76, .84), rgba(18, 78, 178, .65)),
+    url('../../assets/hero/hero-3.png') center/cover no-repeat;
 }
 
 .caregiver-cta__inner {

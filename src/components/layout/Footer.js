@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import logo from '../../assets/icons/logo.png';
+import logo from '../../assets/icons/logo2.png';
 import './Footer.css';
 
 const LINKS = {
@@ -31,7 +31,7 @@ export default function Footer() {
         <div className="footer__grid">
           {/* Brand */}
           <div className="footer__brand">
-            <img src={logo} alt="LiveCare logo" style={{ height: 50, width: 200, display: 'block' }} />
+            <img src={logo} alt="LiveCare logo" className="footer__logo" />
             <p className="footer__tagline">
               Trusted Care, Till Infinity. Connecting families to verified caregivers across Nigeria.
             </p>

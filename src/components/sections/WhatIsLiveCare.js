@@ -39,6 +39,7 @@ export default function WhatIsLiveCare() {
 
           {/* Pillar grid */}
           <div className="what__pillars">
+            <div className="what__feature-image" aria-hidden="true" />
             {PILLARS.map(({ icon, title, desc }, i) => (
               <div key={i} className="what__pillar" style={{ transitionDelay: `${i * 0.1}s` }}>
                 <div className="what__pillar-icon">{icon}</div>

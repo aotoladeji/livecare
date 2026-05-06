@@ -4,13 +4,31 @@
 
 /* ── Hero ─────────────────────────────────────────── */
 .shop-hero {
+  position: relative;
   padding: calc(var(--nav-h) + 72px) 0 64px;
   background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 60%, #1e3a8a 100%);
   text-align: center;
   overflow: hidden;
 }
 
+.shop-hero__image {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: .42;
+}
+
+.shop-hero__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, rgba(8, 30, 74, .86), rgba(30, 91, 198, .62));
+}
+
 .shop-hero__inner {
+  position: relative;
+  z-index: 2;
   opacity: 0;
   transform: translateY(24px);
   transition: opacity 0.6s ease, transform 0.6s ease;

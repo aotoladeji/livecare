@@ -1,9 +1,11 @@
 import React from 'react';
 import './PageHero.css';
 
-export default function PageHero({ tag, title, subtitle, highlight }) {
+export default function PageHero({ tag, title, subtitle, highlight, backgroundImage = '/tmp/hero-2.png' }) {
   return (
     <section className="page-hero">
+      <div className="page-hero__image" style={{ backgroundImage: `url(${backgroundImage})` }} />
+      <div className="page-hero__overlay" />
       <div className="page-hero__blob page-hero__blob--1" />
       <div className="page-hero__blob page-hero__blob--2" />
       <div className="container page-hero__inner">

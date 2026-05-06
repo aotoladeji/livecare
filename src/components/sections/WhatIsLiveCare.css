@@ -26,6 +26,18 @@
   gap: 20px;
 }
 
+.what__feature-image {
+  grid-column: 1 / -1;
+  min-height: 220px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--gray-200);
+  box-shadow: var(--shadow-sm);
+  background:
+    linear-gradient(130deg, rgba(9, 37, 89, .62), rgba(35, 94, 196, .28)),
+    url('../../assets/hero/hero-2.png') center/cover no-repeat;
+}
+
 .what__pillar {
   background: var(--off-white);
   border: 1px solid var(--gray-200);

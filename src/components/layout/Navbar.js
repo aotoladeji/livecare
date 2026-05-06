@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
-import logo from '../../assets/icons/logo.png';
+import logo from '../../assets/icons/logo2.png';
 import './Navbar.css';
 
 const NAV_LINKS = [
@@ -49,7 +49,7 @@ export default function Navbar() {
     <header className={navClass}>
       <div className="container navbar__inner">
         <Link to="/" className="navbar__logo">
-          <img src={logo} alt="LiveCare logo" style={{ height: 50, width: 'auto', display: 'block' }} />
+          <img src={logo} alt="LiveCare logo" className="navbar__logo-img" />
         </Link>
 
         <nav className={`navbar__links ${menuOpen ? 'navbar__links--open' : ''}`}>

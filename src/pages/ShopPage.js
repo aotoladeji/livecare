@@ -193,6 +193,8 @@ export default function ShopPage() {
 
       {/* ── Hero ── */}
       <section className="shop-hero" ref={heroRef}>
+        <div className="shop-hero__image" style={{ backgroundImage: "url('/tmp/hero-1.png')" }} />
+        <div className="shop-hero__overlay" />
         <div className={`container shop-hero__inner ${heroVisible ? 'visible' : ''}`}>
           <span className="section-tag">Geriatric Care Store</span>
           <h1 className="shop-hero__title">
