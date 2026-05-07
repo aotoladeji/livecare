@@ -24,7 +24,8 @@ import {
   where,
   limit,
 } from 'firebase/firestore';
-import { db } from '../firebase';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { db, storage } from '../firebase';
 import { DEFAULT_PRODUCTS } from '../data/shopProducts';
 
 // ─── Waitlist ─────────────────────────────────────────────────
@@ -266,4 +267,49 @@ export function subscribeOrders(callback) {
     }));
     callback(entries);
   });
+}
+
+// ─── Caregiver ID Upload ──────────────────────────────────────
+
+/**
+ * Upload caregiver ID document to Firebase Storage.
+ * @param {string} applicationId - The caregiver application ID
+ * @param {File} file - The file to upload (image or PDF)
+ * @param {string} documentType - Type of ID: 'NIN', 'DRIVERS_LICENSE', or 'PASSPORT'
+ * @returns {Promise<string>} Download URL of the uploaded file
+ */
+export async function uploadCaregiverIDDB(applicationId, file, documentType) {
+  if (!file) throw new Error('No file provided');
+  if (!applicationId) throw new Error('No application ID provided');
+
+  // Create a unique filename
+  const timestamp = Date.now();
+  const fileExtension = file.name.split('.').pop();
+  const fileName = `${documentType}_${timestamp}.${fileExtension}`;
+  const storagePath = `caregiverIDs/${applicationId}/${fileName}`;
+
+  // Upload file to Firebase Storage
+  const storageRef = ref(storage, storagePath);
+  const snapshot = await uploadBytes(storageRef, file);
+
+  // Get download URL
+  const downloadURL = await getDownloadURL(snapshot.ref);
+
+  // Update caregiverApplications document with ID upload info
+  await setDoc(
+    doc(db, 'caregiverApplications', applicationId),
+    {
+      verificationDocuments: [
+        {
+          type: documentType,
+          downloadURL,
+          storagePath,
+          uploadedAt: Date.now(),
+        },
+      ],
+    },
+    { merge: true }
+  );
+
+  return downloadURL;
 }

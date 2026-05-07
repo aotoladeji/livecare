@@ -642,26 +642,49 @@ export default function AdminPage() {
                 <div className="adm-table-wrap">
                   <table className="adm-table">
                     <thead>
-                      <tr><th>Name</th><th>Email</th><th>Phone</th><th>Location</th><th>Experience</th><th>Message</th><th>Submitted</th><th>Actions</th></tr>
+                      <tr><th>Name</th><th>Email</th><th>Phone</th><th>Location</th><th>Experience</th><th>ID Verification</th><th>Submitted</th><th>Actions</th></tr>
                     </thead>
                     <tbody>
-                      {caregiverApplications.map(entry => (
-                        <tr key={entry.id}>
-                          <td>{entry.name}</td>
-                          <td>{entry.email}</td>
-                          <td>{entry.phone}</td>
-                          <td>{entry.location}</td>
-                          <td>{entry.experience || '—'}</td>
-                          <td className="adm-td-msg">{entry.message || '—'}</td>
-                          <td>{formatDate(entry.submittedAt)}</td>
-                          <td>
-                            <div className="adm-actions">
-                              <button className="adm-btn-certify" onClick={() => certifyCaregiverDB(entry).catch(console.error)}>✅ Certify</button>
-                              <button className="adm-btn-delete" onClick={() => deleteCaregiverApplicationDB(entry.id).catch(console.error)}>Delete</button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
+                      {caregiverApplications.map(entry => {
+                        const hasIdUpload = entry.verificationDocuments && entry.verificationDocuments.length > 0;
+                        const idDoc = hasIdUpload ? entry.verificationDocuments[0] : null;
+                        return (
+                          <tr key={entry.id}>
+                            <td>{entry.name}</td>
+                            <td>{entry.email}</td>
+                            <td>{entry.phone}</td>
+                            <td>{entry.location}</td>
+                            <td>{entry.experience || '—'}</td>
+                            <td className="adm-id-status">
+                              {hasIdUpload ? (
+                                <div className="adm-id-badge adm-id-badge--uploaded">
+                                  <span>✓ {idDoc.type.replace('_', ' ')}</span>
+                                  <a
+                                    href={idDoc.downloadURL}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="adm-id-link"
+                                    title="Download ID document"
+                                  >
+                                    📥 View
+                                  </a>
+                                </div>
+                              ) : (
+                                <div className="adm-id-badge adm-id-badge--pending">
+                                  <span>⏳ Pending</span>
+                                </div>
+                              )}
+                            </td>
+                            <td>{formatDate(entry.submittedAt)}</td>
+                            <td>
+                              <div className="adm-actions">
+                                <button className="adm-btn-certify" onClick={() => certifyCaregiverDB(entry).catch(console.error)}>✅ Certify</button>
+                                <button className="adm-btn-delete" onClick={() => deleteCaregiverApplicationDB(entry.id).catch(console.error)}>Delete</button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import PageHero from '../components/ui/PageHero';
 import useInView from '../hooks/useInView';
+import IDUploadDialog from '../components/sections/IDUploadDialog';
 import { addCaregiverApplicationDB } from '../utils/db';
 import './CaregiverPage.css';
 
@@ -52,6 +53,9 @@ export default function CaregiverPage() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState('');
+  const [showIdUpload, setShowIdUpload] = useState(false);
+  const [applicationId, setApplicationId] = useState('');
+  const [applicantName, setApplicantName] = useState('');
 
   const handleChange = ({ target: { name, value } }) =>
     setForm(f => ({ ...f, [name]: value }));
@@ -65,9 +69,12 @@ export default function CaregiverPage() {
     setLoading(true);
     setSubmitError('');
     addCaregiverApplicationDB(form)
-      .then(() => {
+      .then((appId) => {
         setLoading(false);
+        setApplicationId(appId);
+        setApplicantName(form.name);
         setSubmitted(true);
+        setShowIdUpload(true);
       })
       .catch((err) => {
         console.error('Application submission failed:', err);
@@ -154,7 +161,7 @@ export default function CaregiverPage() {
                   Thanks, <strong>{form.name.split(' ')[0]}</strong>! We've received your application and will be
                   in touch within 2–3 business days to discuss next steps.
                 </p>
-                <button className="btn btn-secondary" onClick={() => { setSubmitted(false); setForm(INITIAL_FORM); }}>
+                <button className="btn btn-secondary" onClick={() => { setSubmitted(false); setForm(INITIAL_FORM); setShowIdUpload(false); }}>
                   Submit another application
                 </button>
               </div>
@@ -203,6 +210,24 @@ export default function CaregiverPage() {
           </div>
         </div>
       </section>
+
+      {/* ID Upload Dialog */}
+      {showIdUpload && (
+        <IDUploadDialog
+          applicationId={applicationId}
+          applicantName={applicantName}
+          onClose={() => {
+            setShowIdUpload(false);
+            setSubmitted(false);
+            setForm(INITIAL_FORM);
+          }}
+          onSuccess={() => {
+            setShowIdUpload(false);
+            setSubmitted(false);
+            setForm(INITIAL_FORM);
+          }}
+        />
+      )}
 
       {/* FAQ */}
       <section className="cg-faq" ref={ref4}>

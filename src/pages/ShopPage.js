@@ -12,6 +12,17 @@ function formatNaira(amount) {
   return '₦' + amount.toLocaleString('en-NG');
 }
 
+function shuffleProducts(items) {
+  const next = [...items];
+
+  for (let index = next.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [next[index], next[swapIndex]] = [next[swapIndex], next[index]];
+  }
+
+  return next;
+}
+
 /* ─── Order Modal ───────────────────────────────────────────── */
 function ProductModal({ product, onClose }) {
   const [activeImage, setActiveImage] = useState(0);
@@ -177,8 +188,12 @@ export default function ShopPage() {
     navigate('/payment', { state: { product } });
   };
 
+  const shuffledProducts = useMemo(() => shuffleProducts(products), [products]);
+
   const filtered = useMemo(() => {
-    return products.filter(p => {
+    const source = activeCategory === 'All' ? shuffledProducts : products;
+
+    return source.filter(p => {
       const matchCat    = activeCategory === 'All' || p.category === activeCategory;
       const matchSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
                           p.desc.toLowerCase().includes(search.toLowerCase()) ||
@@ -186,7 +201,7 @@ export default function ShopPage() {
                           (p.availability || '').toLowerCase().includes(search.toLowerCase());
       return matchCat && matchSearch;
     });
-  }, [activeCategory, products, search]);
+  }, [activeCategory, products, search, shuffledProducts]);
 
   return (
     <div className="shop-page">

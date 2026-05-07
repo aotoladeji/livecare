@@ -7,8 +7,8 @@ const NAV_LINKS = [
   { label: 'Home',       to: '/' },
   { label: 'Services',   to: '/services' },
   { label: 'Shop',       to: '/shop' },
-  { label: 'About',      to: '/about' },
   { label: 'Caregivers', to: '/caregivers' },
+  { label: 'About',      to: '/about' },
   { label: 'Contact',    to: '/contact' },
   { label: 'Admin',      to: '/admin' },
 ];

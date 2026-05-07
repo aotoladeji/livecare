@@ -429,6 +429,59 @@
 }
 .adm-btn-certify:hover { background: #bbf7d0; }
 
+/* ID Verification Status */
+
+.adm-id-status {
+  font-size: 0.9rem;
+}
+
+.adm-id-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.adm-id-badge--uploaded {
+  background: #dbeafe;
+  color: #1e40af;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.adm-id-badge--uploaded span {
+  display: block;
+}
+
+.adm-id-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.5);
+  color: #1e40af;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: all 0.15s;
+  cursor: pointer;
+}
+
+.adm-id-link:hover {
+  background: rgba(255, 255, 255, 0.8);
+  text-decoration: underline;
+}
+
+.adm-id-badge--pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
 /* -- Add product form ------------------------------------------- */
 .adm-product-form {
   display: grid;
