@@ -28,6 +28,10 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '../firebase';
 import { DEFAULT_PRODUCTS } from '../data/shopProducts';
 
+function isPermissionDeniedError(error) {
+  return error?.code === 'permission-denied';
+}
+
 // ─── Waitlist ─────────────────────────────────────────────────
 
 export async function addWaitlistEntryDB(entry) {
@@ -131,10 +135,28 @@ export async function deleteCustomProductDB(productId) {
 // ─── Merged product list (default catalog + overrides + custom) ─
 
 export async function getAllProductsDB() {
-  const [imageMap, customProducts] = await Promise.all([
+  const [imageMapResult, customProductsResult] = await Promise.allSettled([
     getProductImagesDB(),
     getCustomProductsDB(),
   ]);
+
+  const imageMap =
+    imageMapResult.status === 'fulfilled'
+      ? imageMapResult.value
+      : isPermissionDeniedError(imageMapResult.reason)
+        ? {}
+        : (() => {
+            throw imageMapResult.reason;
+          })();
+
+  const customProducts =
+    customProductsResult.status === 'fulfilled'
+      ? customProductsResult.value
+      : isPermissionDeniedError(customProductsResult.reason)
+        ? []
+        : (() => {
+            throw customProductsResult.reason;
+          })();
 
   // Apply image overrides to default catalog
   const defaultWithImages = DEFAULT_PRODUCTS.map(p => ({

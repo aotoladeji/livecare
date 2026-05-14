@@ -13,7 +13,6 @@ import {
   subscribeCertifiedCaregivers,
   subscribeWaitlist,
   updateProductImagesDB,
-  addContactSubmissionDB,
   deleteContactSubmissionDB,
   subscribeContacts,
   subscribeOrders,
@@ -149,6 +148,152 @@ export default function AdminPage() {
     () => CATEGORIES.filter(category => category !== 'All'),
     []
   );
+
+  const liveSessions = useMemo(() => {
+    const now = Date.now();
+    return orders
+      .filter(order => !['completed', 'cancelled'].includes(String(order.status || '').toLowerCase()))
+      .map(order => {
+        const createdMs = new Date(order.createdAt || Date.now()).getTime();
+        const ageHours = Math.max(0, (now - createdMs) / (1000 * 60 * 60));
+        const textBlob = `${order.notes || ''} ${order.message || ''} ${order.status || ''}`.toLowerCase();
+        const flagged = textBlob.includes('incident') || textBlob.includes('unsafe') || textBlob.includes('complaint') || String(order.status || '').toLowerCase() === 'flagged';
+
+        let indicator = 'On time';
+        if (flagged) indicator = 'Flagged';
+        else if (ageHours > 24) indicator = 'Delayed';
+
+        const activityCount = Array.isArray(order.items)
+          ? order.items.reduce((sum, item) => sum + Number(item?.quantity || 1), 0)
+          : Number(order.quantity || 1);
+
+        return {
+          ...order,
+          indicator,
+          ageHours,
+          activityCount,
+          sessionLabel: order.productName || 'Care Session',
+          customerLabel: order.customerName || order.name || order.email || 'Unknown',
+        };
+      });
+  }, [orders]);
+
+  const liveSessionCounts = useMemo(() => {
+    return liveSessions.reduce((acc, session) => {
+      if (session.indicator === 'On time') acc.onTime += 1;
+      if (session.indicator === 'Delayed') acc.delayed += 1;
+      if (session.indicator === 'Flagged') acc.flagged += 1;
+      return acc;
+    }, { onTime: 0, delayed: 0, flagged: 0 });
+  }, [liveSessions]);
+
+  const activityLogs = useMemo(() => {
+    const orderLogs = orders.map(order => ({
+      id: `order-${order.id}`,
+      type: 'Session',
+      title: `${order.customerName || 'Customer'} session ${order.status || 'pending'}`,
+      detail: order.productName || 'Care service',
+      date: order.createdAt,
+    }));
+
+    const caregiverLogs = caregiverApplications.map(entry => ({
+      id: `caregiver-${entry.id}`,
+      type: 'Caregiver',
+      title: `${entry.name || 'Applicant'} submitted caregiver application`,
+      detail: entry.location || 'Location not set',
+      date: entry.submittedAt,
+    }));
+
+    const contactLogs = contacts.map(entry => ({
+      id: `contact-${entry.id}`,
+      type: 'Inquiry',
+      title: `${entry.name || 'User'} sent an inquiry`,
+      detail: entry.subject || 'No subject',
+      date: entry.submittedAt,
+    }));
+
+    return [...orderLogs, ...caregiverLogs, ...contactLogs]
+      .sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime())
+      .slice(0, 20);
+  }, [orders, caregiverApplications, contacts]);
+
+  const userManagement = useMemo(() => {
+    const buckets = [waitlist, contacts, caregiverApplications, certifiedCaregivers];
+    const map = new Map();
+
+    buckets.forEach(list => {
+      list.forEach(entry => {
+        const email = String(entry.email || '').trim().toLowerCase();
+        if (!email) return;
+
+        if (!map.has(email)) {
+          map.set(email, {
+            email,
+            name: entry.name || 'Unknown',
+            waitlist: 0,
+            contacts: 0,
+            applications: 0,
+            certified: 0,
+          });
+        }
+
+        const current = map.get(email);
+        if (waitlist.includes(entry)) current.waitlist += 1;
+        if (contacts.includes(entry)) current.contacts += 1;
+        if (caregiverApplications.includes(entry)) current.applications += 1;
+        if (certifiedCaregivers.includes(entry)) current.certified += 1;
+      });
+    });
+
+    return Array.from(map.values()).sort((a, b) => {
+      const scoreA = a.certified * 10 + a.applications * 4 + a.contacts + a.waitlist;
+      const scoreB = b.certified * 10 + b.applications * 4 + b.contacts + b.waitlist;
+      return scoreB - scoreA;
+    });
+  }, [waitlist, contacts, caregiverApplications, certifiedCaregivers]);
+
+  const incidentReports = useMemo(() => {
+    const keyword = /(incident|unsafe|complaint|violence|abuse|delay)/i;
+
+    const orderIncidents = liveSessions
+      .filter(session => session.indicator === 'Flagged' || keyword.test(`${session.notes || ''} ${session.message || ''}`))
+      .map(session => ({
+        id: `session-${session.id}`,
+        source: 'Session Monitoring',
+        label: session.sessionLabel,
+        reporter: session.customerLabel,
+        severity: session.indicator === 'Flagged' ? 'high' : 'medium',
+        date: session.createdAt,
+        notes: session.notes || session.message || 'Flagged by system monitoring rules.',
+      }));
+
+    const contactIncidents = contacts
+      .filter(entry => keyword.test(`${entry.subject || ''} ${entry.message || ''}`))
+      .map(entry => ({
+        id: `contact-${entry.id}`,
+        source: 'Contact Inquiry',
+        label: entry.subject || 'Incident-related inquiry',
+        reporter: entry.name || entry.email || 'Anonymous',
+        severity: 'medium',
+        date: entry.submittedAt,
+        notes: entry.message || 'No additional details',
+      }));
+
+    return [...orderIncidents, ...contactIncidents]
+      .sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime());
+  }, [liveSessions, contacts]);
+
+  const consistencySummary = useMemo(() => {
+    const total = caregiverApplications.length;
+    const withId = caregiverApplications.filter(entry => Array.isArray(entry.verificationDocuments) && entry.verificationDocuments.length > 0).length;
+    const consistencyRate = total === 0 ? 0 : Math.round((withId / total) * 100);
+
+    return {
+      consistencyRate,
+      withId,
+      withoutId: Math.max(total - withId, 0),
+    };
+  }, [caregiverApplications]);
 
   const handleChangePassword = (event) => {
     event.preventDefault();
@@ -354,6 +499,11 @@ export default function AdminPage() {
 
   const NAV_ITEMS = [
     { id: 'overview',    icon: '📊', label: 'Overview' },
+    { id: 'live-monitoring', icon: '🟢', label: 'Live Monitoring', badge: liveSessions.length },
+    { id: 'quality-review', icon: '🧪', label: 'Quality Review' },
+    { id: 'user-management', icon: '👥', label: 'User Management', badge: userManagement.length },
+    { id: 'session-monitoring', icon: '🎯', label: 'Session Monitoring', badge: liveSessions.length },
+    { id: 'incident-handling', icon: '🚨', label: 'Incident Handling', badge: incidentReports.length },
     { id: 'waitlist',    icon: '📋', label: 'Waitlist', badge: waitlist.length },
     { id: 'contacts',    icon: '💬', label: 'Contact Inquiries', badge: contacts.length },
     { id: 'orders',      icon: '🛒', label: 'Orders', badge: orders.length },
@@ -624,6 +774,176 @@ export default function AdminPage() {
                               <button className="adm-btn-delete" onClick={() => deleteOrderDB(order.id).catch(console.error)}>Delete</button>
                             </div>
                           </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── Live Monitoring Dashboard ── */}
+          {activeSection === 'live-monitoring' && (
+            <div className="adm-section">
+              <div className="adm-stats adm-monitoring-stats">
+                <div className="adm-stat"><span className="adm-stat__icon">🟢</span><div><p className="adm-stat__label">On Time</p><strong className="adm-stat__val">{liveSessionCounts.onTime}</strong></div></div>
+                <div className="adm-stat"><span className="adm-stat__icon">🟠</span><div><p className="adm-stat__label">Delayed</p><strong className="adm-stat__val">{liveSessionCounts.delayed}</strong></div></div>
+                <div className="adm-stat"><span className="adm-stat__icon">🔴</span><div><p className="adm-stat__label">Flagged</p><strong className="adm-stat__val">{liveSessionCounts.flagged}</strong></div></div>
+              </div>
+
+              {liveSessions.length === 0 ? (
+                <p className="adm-empty">No active sessions at the moment.</p>
+              ) : (
+                <div className="adm-table-wrap">
+                  <table className="adm-table">
+                    <thead>
+                      <tr><th>Session</th><th>Customer</th><th>Status</th><th>Activity Count</th><th>Age</th><th>Created</th></tr>
+                    </thead>
+                    <tbody>
+                      {liveSessions.map(session => (
+                        <tr key={session.id}>
+                          <td>{session.sessionLabel}</td>
+                          <td>{session.customerLabel}</td>
+                          <td><span className={`adm-status-pill adm-status-pill--${session.indicator.toLowerCase().replace(' ', '-')}`}>{session.indicator}</span></td>
+                          <td>{session.activityCount}</td>
+                          <td>{Math.round(session.ageHours)}h</td>
+                          <td>{formatDate(session.createdAt)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── Quality Review Panel ── */}
+          {activeSection === 'quality-review' && (
+            <div className="adm-section">
+              <div className="adm-stats adm-monitoring-stats">
+                <div className="adm-stat"><span className="adm-stat__icon">📑</span><div><p className="adm-stat__label">Activity Logs</p><strong className="adm-stat__val">{activityLogs.length}</strong></div></div>
+                <div className="adm-stat"><span className="adm-stat__icon">📈</span><div><p className="adm-stat__label">Consistency</p><strong className="adm-stat__val">{consistencySummary.consistencyRate}%</strong></div></div>
+                <div className="adm-stat"><span className="adm-stat__icon">🚨</span><div><p className="adm-stat__label">Incident Reports</p><strong className="adm-stat__val">{incidentReports.length}</strong></div></div>
+              </div>
+
+              <div className="adm-table-wrap" style={{ marginBottom: '16px' }}>
+                <table className="adm-table">
+                  <thead>
+                    <tr><th>Timestamp</th><th>Type</th><th>Activity</th><th>Observation</th></tr>
+                  </thead>
+                  <tbody>
+                    {activityLogs.length === 0 ? (
+                      <tr><td colSpan={4}>No activity logs yet.</td></tr>
+                    ) : activityLogs.map(log => (
+                      <tr key={log.id}>
+                        <td>{formatDate(log.date)}</td>
+                        <td>{log.type}</td>
+                        <td>{log.title}</td>
+                        <td>{log.detail}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="adm-overview-shortcuts adm-quality-patterns">
+                <div className="adm-shortcut">
+                  <span>🧭</span>
+                  <span>Observation Patterns</span>
+                  <small>{liveSessionCounts.delayed} delayed sessions currently require follow-up.</small>
+                </div>
+                <div className="adm-shortcut">
+                  <span>👤</span>
+                  <span>Caregiver Consistency</span>
+                  <small>{consistencySummary.withId} with IDs uploaded, {consistencySummary.withoutId} pending document verification.</small>
+                </div>
+                <div className="adm-shortcut">
+                  <span>🚨</span>
+                  <span>Incident Reports</span>
+                  <small>{incidentReports.length} reports identified from session and inquiry streams.</small>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── User Management ── */}
+          {activeSection === 'user-management' && (
+            <div className="adm-section">
+              {userManagement.length === 0 ? (
+                <p className="adm-empty">No users captured yet.</p>
+              ) : (
+                <div className="adm-table-wrap">
+                  <table className="adm-table">
+                    <thead>
+                      <tr><th>Name</th><th>Email</th><th>Waitlist</th><th>Inquiries</th><th>Applications</th><th>Certified</th></tr>
+                    </thead>
+                    <tbody>
+                      {userManagement.slice(0, 50).map(user => (
+                        <tr key={user.email}>
+                          <td>{user.name}</td>
+                          <td>{user.email}</td>
+                          <td>{user.waitlist}</td>
+                          <td>{user.contacts}</td>
+                          <td>{user.applications}</td>
+                          <td>{user.certified}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── Session Monitoring ── */}
+          {activeSection === 'session-monitoring' && (
+            <div className="adm-section">
+              {liveSessions.length === 0 ? (
+                <p className="adm-empty">No sessions available for monitoring.</p>
+              ) : (
+                <div className="adm-table-wrap">
+                  <table className="adm-table">
+                    <thead>
+                      <tr><th>Session</th><th>Customer</th><th>Indicator</th><th>Status</th><th>Activity Count</th></tr>
+                    </thead>
+                    <tbody>
+                      {liveSessions.map(session => (
+                        <tr key={`monitor-${session.id}`}>
+                          <td>{session.sessionLabel}</td>
+                          <td>{session.customerLabel}</td>
+                          <td><span className={`adm-status-pill adm-status-pill--${session.indicator.toLowerCase().replace(' ', '-')}`}>{session.indicator}</span></td>
+                          <td style={{ textTransform: 'capitalize' }}>{session.status || 'pending'}</td>
+                          <td>{session.activityCount}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── Incident Handling ── */}
+          {activeSection === 'incident-handling' && (
+            <div className="adm-section">
+              {incidentReports.length === 0 ? (
+                <p className="adm-empty">No incidents detected.</p>
+              ) : (
+                <div className="adm-table-wrap">
+                  <table className="adm-table">
+                    <thead>
+                      <tr><th>Source</th><th>Subject</th><th>Reporter</th><th>Severity</th><th>Notes</th><th>Date</th></tr>
+                    </thead>
+                    <tbody>
+                      {incidentReports.map(report => (
+                        <tr key={report.id}>
+                          <td>{report.source}</td>
+                          <td>{report.label}</td>
+                          <td>{report.reporter}</td>
+                          <td><span className={`adm-severity adm-severity--${report.severity}`}>{report.severity.toUpperCase()}</span></td>
+                          <td className="adm-td-msg">{report.notes}</td>
+                          <td>{formatDate(report.date)}</td>
                         </tr>
                       ))}
                     </tbody>

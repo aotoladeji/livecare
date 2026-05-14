@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import useInView from '../hooks/useInView';
-import { CATEGORIES } from '../data/shopProducts';
+import { CATEGORIES, DEFAULT_PRODUCTS } from '../data/shopProducts';
 import { getAllProductsDB } from '../utils/db';
 import './ShopPage.css';
 
@@ -180,7 +180,10 @@ export default function ShopPage() {
     setProductsLoading(true);
     getAllProductsDB()
       .then(prods => setProducts(prods))
-      .catch(err => console.error('Failed to load products:', err))
+      .catch(err => {
+        console.warn('Falling back to default products:', err);
+        setProducts(DEFAULT_PRODUCTS);
+      })
       .finally(() => setProductsLoading(false));
   }, []);
 
