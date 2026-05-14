@@ -544,6 +544,15 @@ export default function AdminPage() {
         { id: 'add-product', icon: '➕', label: 'Add Shop Item' },
       ],
     },
+    {
+      id: 'account',
+      label: 'Account',
+      items: [
+        { id: '__back_to_web__', icon: '🌐', label: 'Back to Web', action: () => navigate('/') },
+        { id: '__change_password__', icon: '🔐', label: 'Change Password', action: () => setShowChangePassword(true) },
+        { id: '__logout__', icon: '🚪', label: 'Log Out', action: handleLogout, tone: 'logout' },
+      ],
+    },
   ];
 
   const NAV_ITEMS = NAV_GROUPS.flatMap(group => group.items);
@@ -569,8 +578,15 @@ export default function AdminPage() {
               {group.items.map(item => (
                 <button
                   key={item.id}
-                  className={`adm-nav-item ${activeSection === item.id ? 'adm-nav-item--active' : ''}`}
-                  onClick={() => navTo(item.id)}
+                  className={`adm-nav-item ${activeSection === item.id ? 'adm-nav-item--active' : ''} ${item.tone === 'logout' ? 'adm-nav-item--logout' : ''}`}
+                  onClick={() => {
+                    if (typeof item.action === 'function') {
+                      item.action();
+                      setSidebarOpen(false);
+                      return;
+                    }
+                    navTo(item.id);
+                  }}
                 >
                   <span className="adm-nav-item__icon">{item.icon}</span>
                   <span className="adm-nav-item__label">{item.label}</span>
@@ -580,21 +596,6 @@ export default function AdminPage() {
             </div>
           ))}
         </nav>
-
-        <div className="adm-sidebar__footer">
-          <button className="adm-nav-item" onClick={() => navigate('/')} title="Back to website">
-            <span className="adm-nav-item__icon">🌐</span>
-            <span className="adm-nav-item__label">Back to Web</span>
-          </button>
-            <button className="adm-nav-item" onClick={() => setShowChangePassword(true)} title="Change password">
-              <span className="adm-nav-item__icon">🔐</span>
-              <span className="adm-nav-item__label">Change Password</span>
-            </button>
-          <button className="adm-nav-item adm-nav-item--logout" onClick={handleLogout}>
-            <span className="adm-nav-item__icon">🚪</span>
-            <span className="adm-nav-item__label">Log Out</span>
-          </button>
-        </div>
       </aside>
 
       {/* Mobile overlay */}

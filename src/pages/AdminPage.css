@@ -206,11 +206,6 @@
   padding: 0 5px;
 }
 
-.adm-sidebar__footer {
-  padding: 12px;
-  border-top: 1px solid rgba(255,255,255,0.08);
-}
-
 .adm-nav-item--logout {
   color: rgba(255,120,120,0.8);
 }

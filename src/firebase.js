@@ -19,6 +19,10 @@ export const db = getFirestore(app);
 
 let firebaseSessionPromise;
 
+function isAnonymousAuthRestricted(error) {
+  return error?.code === 'auth/admin-restricted-operation';
+}
+
 export async function ensureFirebaseSession() {
   if (!firebaseSessionPromise) {
     firebaseSessionPromise = (async () => {
@@ -32,9 +36,18 @@ export async function ensureFirebaseSession() {
       if (auth.currentUser) {
         return auth.currentUser;
       }
-
-      const credentials = await signInAnonymously(auth);
-      return credentials.user;
+      try {
+        const credentials = await signInAnonymously(auth);
+        return credentials.user;
+      } catch (error) {
+        if (isAnonymousAuthRestricted(error)) {
+          // Some Firebase projects disable anonymous sign-in.
+          // Continue without a Firebase user so unauth rules can still be used.
+          console.warn('Anonymous Firebase auth is disabled for this project; continuing without sign-in.');
+          return null;
+        }
+        throw error;
+      }
     })().catch((error) => {
       firebaseSessionPromise = null;
       throw error;
