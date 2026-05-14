@@ -25,7 +25,7 @@ import {
   limit,
 } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { db, storage } from '../firebase';
+import { db, storage, ensureFirebaseSession } from '../firebase';
 import { DEFAULT_PRODUCTS } from '../data/shopProducts';
 
 function isPermissionDeniedError(error) {
@@ -44,9 +44,47 @@ function resolveSettledValue(result, fallbackValue, allowPermissionFallback) {
   throw result.reason;
 }
 
+function handleSnapshotError(source, error, onError) {
+  if (isPermissionDeniedError(error)) {
+    console.warn(`Firestore listener permission denied (${source}).`, error);
+  } else {
+    console.error(`Firestore listener error (${source}).`, error);
+  }
+
+  if (typeof onError === 'function') {
+    onError(error);
+  }
+}
+
+function startAuthorizedSnapshot(source, buildQuery, onData, onError) {
+  let unsubscribe = () => {};
+  let isClosed = false;
+
+  ensureFirebaseSession()
+    .then(() => {
+      if (isClosed) {
+        return;
+      }
+
+      unsubscribe = onSnapshot(
+        buildQuery(),
+        onData,
+        (error) => handleSnapshotError(source, error, onError)
+      );
+    })
+    .catch((error) => handleSnapshotError(source, error, onError));
+
+  return () => {
+    isClosed = true;
+    unsubscribe();
+  };
+}
+
 // ─── Waitlist ─────────────────────────────────────────────────
 
 export async function addWaitlistEntryDB(entry) {
+  await ensureFirebaseSession();
+
   const normalizedEmail = String(entry.email || '').trim().toLowerCase();
   const normalizedPhone = String(entry.phone || '').replace(/\s+/g, '');
 
@@ -76,6 +114,8 @@ export async function addWaitlistEntryDB(entry) {
 }
 
 export async function getWaitlistEntriesDB() {
+  await ensureFirebaseSession();
+
   const q = query(collection(db, 'waitlist'), orderBy('submittedAt', 'desc'));
   const snapshot = await getDocs(q);
   return snapshot.docs.map(d => ({
@@ -86,6 +126,7 @@ export async function getWaitlistEntriesDB() {
 }
 
 export async function deleteWaitlistEntryDB(entryId) {
+  await ensureFirebaseSession();
   await deleteDoc(doc(db, 'waitlist', entryId));
 }
 
@@ -93,6 +134,7 @@ export async function deleteWaitlistEntryDB(entryId) {
  * Returns the current waitlist count from Firestore.
  */
 export async function getWaitlistCountDB() {
+  await ensureFirebaseSession();
   const snapshot = await getCountFromServer(collection(db, 'waitlist'));
   return snapshot.data().count;
 }
@@ -101,21 +143,21 @@ export async function getWaitlistCountDB() {
  * Subscribes to real-time waitlist updates.
  * Returns an unsubscribe function — call it on component unmount.
  */
-export function subscribeWaitlist(callback) {
-  const q = query(collection(db, 'waitlist'), orderBy('submittedAt', 'desc'));
-  return onSnapshot(q, (snapshot) => {
+export function subscribeWaitlist(callback, onError) {
+  return startAuthorizedSnapshot('waitlist', () => query(collection(db, 'waitlist'), orderBy('submittedAt', 'desc')), (snapshot) => {
     const entries = snapshot.docs.map(d => ({
       id: d.id,
       ...d.data(),
       submittedAt: d.data().submittedAt?.toDate?.()?.toISOString() ?? new Date().toISOString(),
     }));
     callback(entries);
-  });
+  }, onError);
 }
 
 // ─── Product Images ───────────────────────────────────────────
 
 export async function getProductImagesDB() {
+  await ensureFirebaseSession();
   const snapshot = await getDocs(collection(db, 'productImages'));
   const map = {};
   snapshot.docs.forEach(d => {
@@ -125,22 +167,26 @@ export async function getProductImagesDB() {
 }
 
 export async function updateProductImagesDB(productId, images) {
+  await ensureFirebaseSession();
   await setDoc(doc(db, 'productImages', String(productId)), { images });
 }
 
 // ─── Custom Products ──────────────────────────────────────────
 
 export async function getCustomProductsDB() {
+  await ensureFirebaseSession();
   const snapshot = await getDocs(collection(db, 'customProducts'));
   return snapshot.docs.map(d => ({ ...d.data(), id: d.id }));
 }
 
 export async function addCustomProductDB(product) {
+  await ensureFirebaseSession();
   const docRef = await addDoc(collection(db, 'customProducts'), product);
   return docRef.id; // Firestore-generated id
 }
 
 export async function deleteCustomProductDB(productId) {
+  await ensureFirebaseSession();
   await deleteDoc(doc(db, 'customProducts', String(productId)));
 }
 
@@ -175,6 +221,7 @@ export async function getAllProductsDB(options = {}) {
 // ─── Caregiver Applications ───────────────────────────────────
 
 export async function addCaregiverApplicationDB(entry) {
+  await ensureFirebaseSession();
   const docRef = await addDoc(collection(db, 'caregiverApplications'), {
     ...entry,
     status: 'pending',
@@ -184,19 +231,19 @@ export async function addCaregiverApplicationDB(entry) {
 }
 
 export async function deleteCaregiverApplicationDB(id) {
+  await ensureFirebaseSession();
   await deleteDoc(doc(db, 'caregiverApplications', id));
 }
 
-export function subscribeCaregiverApplications(callback) {
-  const q = query(collection(db, 'caregiverApplications'), orderBy('submittedAt', 'desc'));
-  return onSnapshot(q, (snapshot) => {
+export function subscribeCaregiverApplications(callback, onError) {
+  return startAuthorizedSnapshot('caregiverApplications', () => query(collection(db, 'caregiverApplications'), orderBy('submittedAt', 'desc')), (snapshot) => {
     const entries = snapshot.docs.map(d => ({
       id: d.id,
       ...d.data(),
       submittedAt: d.data().submittedAt?.toDate?.()?.toISOString() ?? new Date().toISOString(),
     }));
     callback(entries);
-  });
+  }, onError);
 }
 
 // ─── Certified Caregivers ─────────────────────────────────────
@@ -206,6 +253,7 @@ export function subscribeCaregiverApplications(callback) {
  * and removes them from applications.
  */
 export async function certifyCaregiverDB(application) {
+  await ensureFirebaseSession();
   const { id, ...data } = application;
   await addDoc(collection(db, 'certifiedCaregivers'), {
     ...data,
@@ -216,12 +264,12 @@ export async function certifyCaregiverDB(application) {
 }
 
 export async function removeCertifiedCaregiverDB(id) {
+  await ensureFirebaseSession();
   await deleteDoc(doc(db, 'certifiedCaregivers', id));
 }
 
-export function subscribeCertifiedCaregivers(callback) {
-  const q = query(collection(db, 'certifiedCaregivers'), orderBy('certifiedAt', 'desc'));
-  return onSnapshot(q, (snapshot) => {
+export function subscribeCertifiedCaregivers(callback, onError) {
+  return startAuthorizedSnapshot('certifiedCaregivers', () => query(collection(db, 'certifiedCaregivers'), orderBy('certifiedAt', 'desc')), (snapshot) => {
     const entries = snapshot.docs.map(d => ({
       id: d.id,
       ...d.data(),
@@ -229,12 +277,13 @@ export function subscribeCertifiedCaregivers(callback) {
       submittedAt: d.data().submittedAt?.toDate?.()?.toISOString() ?? null,
     }));
     callback(entries);
-  });
+  }, onError);
 }
 
 // ─── Contact Form Submissions ─────────────────────────────────
 
 export async function addContactSubmissionDB(submission) {
+  await ensureFirebaseSession();
   const docRef = await addDoc(collection(db, 'contacts'), {
     ...submission,
     status: 'new',
@@ -244,24 +293,25 @@ export async function addContactSubmissionDB(submission) {
 }
 
 export async function deleteContactSubmissionDB(id) {
+  await ensureFirebaseSession();
   await deleteDoc(doc(db, 'contacts', id));
 }
 
-export function subscribeContacts(callback) {
-  const q = query(collection(db, 'contacts'), orderBy('submittedAt', 'desc'));
-  return onSnapshot(q, (snapshot) => {
+export function subscribeContacts(callback, onError) {
+  return startAuthorizedSnapshot('contacts', () => query(collection(db, 'contacts'), orderBy('submittedAt', 'desc')), (snapshot) => {
     const entries = snapshot.docs.map(d => ({
       id: d.id,
       ...d.data(),
       submittedAt: d.data().submittedAt?.toDate?.()?.toISOString() ?? new Date().toISOString(),
     }));
     callback(entries);
-  });
+  }, onError);
 }
 
 // ─── Orders ───────────────────────────────────────────────────
 
 export async function createOrderDB(order) {
+  await ensureFirebaseSession();
   const docRef = await addDoc(collection(db, 'orders'), {
     ...order,
     status: 'pending',
@@ -271,23 +321,24 @@ export async function createOrderDB(order) {
 }
 
 export async function updateOrderStatusDB(orderId, status) {
+  await ensureFirebaseSession();
   await setDoc(doc(db, 'orders', orderId), { status }, { merge: true });
 }
 
 export async function deleteOrderDB(orderId) {
+  await ensureFirebaseSession();
   await deleteDoc(doc(db, 'orders', orderId));
 }
 
-export function subscribeOrders(callback) {
-  const q = query(collection(db, 'orders'), orderBy('createdAt', 'desc'));
-  return onSnapshot(q, (snapshot) => {
+export function subscribeOrders(callback, onError) {
+  return startAuthorizedSnapshot('orders', () => query(collection(db, 'orders'), orderBy('createdAt', 'desc')), (snapshot) => {
     const entries = snapshot.docs.map(d => ({
       id: d.id,
       ...d.data(),
       createdAt: d.data().createdAt?.toDate?.()?.toISOString() ?? new Date().toISOString(),
     }));
     callback(entries);
-  });
+  }, onError);
 }
 
 // ─── Caregiver ID Upload ──────────────────────────────────────
@@ -300,6 +351,8 @@ export function subscribeOrders(callback) {
  * @returns {Promise<string>} Download URL of the uploaded file
  */
 export async function uploadCaregiverIDDB(applicationId, file, documentType) {
+  await ensureFirebaseSession();
+
   if (!file) throw new Error('No file provided');
   if (!applicationId) throw new Error('No application ID provided');
 

@@ -80,6 +80,15 @@ export default function AdminPage() {
   const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
   const [passwordError, setPasswordError] = useState('');
 
+  const handleRealtimeError = useCallback((error) => {
+    if (error?.code === 'permission-denied') {
+      setDbError('Permission denied for some admin data. Update Firestore rules or sign in with an authorized account.');
+      return;
+    }
+
+    setDbError('Real-time updates are temporarily unavailable. Please refresh and try again.');
+  }, []);
+
   const loadProducts = useCallback(() => {
     setDbLoading(true);
     setDbError('');
@@ -97,45 +106,45 @@ export default function AdminPage() {
     if (!authenticated) return;
     const unsubscribe = subscribeWaitlist((entries) => {
       setWaitlist(entries);
-    });
+    }, handleRealtimeError);
     return () => unsubscribe();
-  }, [authenticated]);
+  }, [authenticated, handleRealtimeError]);
 
   // Real-time caregiver application listener
   useEffect(() => {
     if (!authenticated) return;
     const unsubscribe = subscribeCaregiverApplications((entries) => {
       setCaregiverApplications(entries);
-    });
+    }, handleRealtimeError);
     return () => unsubscribe();
-  }, [authenticated]);
+  }, [authenticated, handleRealtimeError]);
 
   // Real-time certified caregivers listener
   useEffect(() => {
     if (!authenticated) return;
     const unsubscribe = subscribeCertifiedCaregivers((entries) => {
       setCertifiedCaregivers(entries);
-    });
+    }, handleRealtimeError);
     return () => unsubscribe();
-  }, [authenticated]);
+  }, [authenticated, handleRealtimeError]);
 
   // Real-time contacts listener
   useEffect(() => {
     if (!authenticated) return;
     const unsubscribe = subscribeContacts((entries) => {
       setContacts(entries);
-    });
+    }, handleRealtimeError);
     return () => unsubscribe();
-  }, [authenticated]);
+  }, [authenticated, handleRealtimeError]);
 
   // Real-time orders listener
   useEffect(() => {
     if (!authenticated) return;
     const unsubscribe = subscribeOrders((entries) => {
       setOrders(entries);
-    });
+    }, handleRealtimeError);
     return () => unsubscribe();
-  }, [authenticated]);
+  }, [authenticated, handleRealtimeError]);
 
   // Load products once on login
   useEffect(() => {

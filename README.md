@@ -173,6 +173,12 @@ If your Firestore rules block product collections, the shop can still render def
 but remote image overrides and custom products will not appear. Keep these rules aligned
 so public catalog reads always work.
 
+Anonymous Auth is now used by the app to establish a Firebase session automatically.
+In Firebase Console, enable:
+
+1. Authentication → Sign-in method → `Anonymous` (enabled)
+2. Firestore Database → Rules → use the rules from `firestore.rules`
+
 Recommended baseline (adjust for your auth model):
 
 ```txt
@@ -222,9 +228,10 @@ service cloud.firestore {
 Release checklist:
 
 1. Verify Firestore rules allow `read` on `productImages` and `customProducts`.
-2. Open `/shop` in a private window and confirm products render without admin login.
-3. Confirm admin-only collections remain protected for unauthenticated users.
-4. Redeploy rules with `firebase deploy --only firestore:rules`.
+2. Verify Firebase `Anonymous` auth provider is enabled.
+3. Open `/shop` in a private window and confirm products render without admin login.
+4. Confirm admin-only collections remain protected for unauthenticated users.
+5. Deploy rules from `firestore.rules` using your Firebase project.
 
 ---
 
