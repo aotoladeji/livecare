@@ -231,7 +231,7 @@ Release checklist:
 2. If enabled, verify Firebase `Anonymous` auth provider is configured correctly.
 3. Open `/shop` in a private window and confirm products render without admin login.
 4. Confirm admin-only collections remain protected for unauthenticated users.
-5. Deploy rules from `firestore.rules` using your Firebase project.
+5. Deploy rules from `firestore.rules` using `npm run deploy:rules`.
 
 ---
 
