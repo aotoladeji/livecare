@@ -167,4 +167,65 @@ Works with any static host:
 
 ---
 
+## 🔐 Firebase Rules (Prevent Product Read Outages)
+
+If your Firestore rules block product collections, the shop can still render defaults,
+but remote image overrides and custom products will not appear. Keep these rules aligned
+so public catalog reads always work.
+
+Recommended baseline (adjust for your auth model):
+
+```txt
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Public shop data (read-only for visitors)
+    match /productImages/{docId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
+    match /customProducts/{docId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
+    // Operational data should stay protected
+    match /waitlist/{docId} {
+      allow create: if true;
+      allow read, update, delete: if request.auth != null;
+    }
+
+    match /caregiverApplications/{docId} {
+      allow create: if true;
+      allow read, update, delete: if request.auth != null;
+    }
+
+    match /certifiedCaregivers/{docId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
+    match /contacts/{docId} {
+      allow create: if true;
+      allow read, update, delete: if request.auth != null;
+    }
+
+    match /orders/{docId} {
+      allow create: if true;
+      allow read, update, delete: if request.auth != null;
+    }
+  }
+}
+```
+
+Release checklist:
+
+1. Verify Firestore rules allow `read` on `productImages` and `customProducts`.
+2. Open `/shop` in a private window and confirm products render without admin login.
+3. Confirm admin-only collections remain protected for unauthenticated users.
+4. Redeploy rules with `firebase deploy --only firestore:rules`.
+
+---
+
 Built with ❤️ for LiveCare, Ibadan, Nigeria.

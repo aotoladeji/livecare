@@ -178,7 +178,7 @@ export default function ShopPage() {
 
   useEffect(() => {
     setProductsLoading(true);
-    getAllProductsDB()
+    getAllProductsDB({ fallbackOnPermissionDenied: true })
       .then(prods => setProducts(prods))
       .catch(err => {
         console.warn('Falling back to default products:', err);

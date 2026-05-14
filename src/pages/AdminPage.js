@@ -83,7 +83,7 @@ export default function AdminPage() {
   const loadProducts = useCallback(() => {
     setDbLoading(true);
     setDbError('');
-    getAllProductsDB()
+    getAllProductsDB({ fallbackOnPermissionDenied: false })
       .then(prods => setProducts(prods))
       .catch(err => {
         console.error(err);

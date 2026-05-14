@@ -32,6 +32,18 @@ function isPermissionDeniedError(error) {
   return error?.code === 'permission-denied';
 }
 
+function resolveSettledValue(result, fallbackValue, allowPermissionFallback) {
+  if (result.status === 'fulfilled') {
+    return result.value;
+  }
+
+  if (allowPermissionFallback && isPermissionDeniedError(result.reason)) {
+    return fallbackValue;
+  }
+
+  throw result.reason;
+}
+
 // ─── Waitlist ─────────────────────────────────────────────────
 
 export async function addWaitlistEntryDB(entry) {
@@ -134,29 +146,16 @@ export async function deleteCustomProductDB(productId) {
 
 // ─── Merged product list (default catalog + overrides + custom) ─
 
-export async function getAllProductsDB() {
+export async function getAllProductsDB(options = {}) {
+  const { fallbackOnPermissionDenied = false } = options;
+
   const [imageMapResult, customProductsResult] = await Promise.allSettled([
     getProductImagesDB(),
     getCustomProductsDB(),
   ]);
 
-  const imageMap =
-    imageMapResult.status === 'fulfilled'
-      ? imageMapResult.value
-      : isPermissionDeniedError(imageMapResult.reason)
-        ? {}
-        : (() => {
-            throw imageMapResult.reason;
-          })();
-
-  const customProducts =
-    customProductsResult.status === 'fulfilled'
-      ? customProductsResult.value
-      : isPermissionDeniedError(customProductsResult.reason)
-        ? []
-        : (() => {
-            throw customProductsResult.reason;
-          })();
+  const imageMap = resolveSettledValue(imageMapResult, {}, fallbackOnPermissionDenied);
+  const customProducts = resolveSettledValue(customProductsResult, [], fallbackOnPermissionDenied);
 
   // Apply image overrides to default catalog
   const defaultWithImages = DEFAULT_PRODUCTS.map(p => ({
