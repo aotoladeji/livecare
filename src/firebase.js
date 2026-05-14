@@ -18,9 +18,26 @@ export const storage = getStorage(app);
 export const db = getFirestore(app);
 
 let firebaseSessionPromise;
+const ANON_AUTH_DISABLED_KEY = 'livecare_firebase_anon_auth_disabled';
 
 function isAnonymousAuthRestricted(error) {
   return error?.code === 'auth/admin-restricted-operation';
+}
+
+function isBrowser() {
+  return typeof window !== 'undefined' && typeof window.localStorage !== 'undefined';
+}
+
+function shouldSkipAnonymousAuth() {
+  return isBrowser() && window.localStorage.getItem(ANON_AUTH_DISABLED_KEY) === 'true';
+}
+
+function rememberAnonymousAuthDisabled() {
+  if (!isBrowser()) {
+    return;
+  }
+
+  window.localStorage.setItem(ANON_AUTH_DISABLED_KEY, 'true');
 }
 
 export async function ensureFirebaseSession() {
@@ -36,6 +53,11 @@ export async function ensureFirebaseSession() {
       if (auth.currentUser) {
         return auth.currentUser;
       }
+
+      if (shouldSkipAnonymousAuth()) {
+        return null;
+      }
+
       try {
         const credentials = await signInAnonymously(auth);
         return credentials.user;
@@ -43,7 +65,7 @@ export async function ensureFirebaseSession() {
         if (isAnonymousAuthRestricted(error)) {
           // Some Firebase projects disable anonymous sign-in.
           // Continue without a Firebase user so unauth rules can still be used.
-          console.warn('Anonymous Firebase auth is disabled for this project; continuing without sign-in.');
+          rememberAnonymousAuthDisabled();
           return null;
         }
         throw error;

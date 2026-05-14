@@ -32,6 +32,10 @@ function isPermissionDeniedError(error) {
   return error?.code === 'permission-denied';
 }
 
+function isAuthRestrictionError(error) {
+  return error?.code === 'auth/admin-restricted-operation';
+}
+
 function resolveSettledValue(result, fallbackValue, allowPermissionFallback) {
   if (result.status === 'fulfilled') {
     return result.value;
@@ -45,9 +49,7 @@ function resolveSettledValue(result, fallbackValue, allowPermissionFallback) {
 }
 
 function handleSnapshotError(source, error, onError) {
-  if (isPermissionDeniedError(error)) {
-    console.warn(`Firestore listener permission denied (${source}).`, error);
-  } else {
+  if (!isPermissionDeniedError(error) && !isAuthRestrictionError(error)) {
     console.error(`Firestore listener error (${source}).`, error);
   }
 

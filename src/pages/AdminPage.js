@@ -95,8 +95,12 @@ export default function AdminPage() {
     getAllProductsDB({ fallbackOnPermissionDenied: false })
       .then(prods => setProducts(prods))
       .catch(err => {
-        console.error(err);
-        setDbError('Failed to load products. Check your connection.');
+        if (err?.code === 'permission-denied') {
+          setDbError('Permission denied for product data. Update Firestore rules to allow admin access.');
+        } else {
+          console.error(err);
+          setDbError('Failed to load products. Check your connection.');
+        }
       })
       .finally(() => setDbLoading(false));
   }, []);
