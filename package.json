@@ -16,7 +16,11 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "deploy:rules": "npx firebase-tools deploy --only firestore:rules",
+    "firebase:whoami": "npx --yes firebase-tools login:list",
+    "firebase:login": "npx --yes firebase-tools login",
+    "firebase:use": "npx --yes firebase-tools use live-care-app",
+    "deploy:rules": "npx --yes firebase-tools deploy --only firestore:rules",
+    "firebase:repair": "npx --yes firebase-tools use live-care-app && npx --yes firebase-tools deploy --only firestore:rules",
     "postinstall": "chmod +x node_modules/.bin/react-scripts"
   },
   "eslintConfig": {

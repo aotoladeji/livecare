@@ -169,57 +169,60 @@ Works with any static host:
 
 ## 🔐 Firebase Rules (Prevent Product Read Outages)
 
-If your Firestore rules block product collections, the shop can still render defaults,
-but remote image overrides and custom products will not appear. Keep these rules aligned
-so public catalog reads always work.
+If your live Firestore rules drift from `firestore.rules`, the admin dashboard can fail with
+`Missing or insufficient permissions`. Keep rules deployment consistent to prevent outages.
 
-The app now auto-attempts Anonymous Auth, but it also works if Anonymous Auth is disabled.
+This app does not depend on Firebase Auth for runtime access.
 In Firebase Console:
 
 1. Firestore Database → Rules → use the rules from `firestore.rules`
-2. Authentication → Sign-in method → `Anonymous` is optional (recommended, not required)
+2. Authentication provider settings are optional for current app flows
 
-Recommended baseline (adjust for your auth model):
+Current rules baseline (kept in `firestore.rules`):
 
 ```txt
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Public shop data (read-only for visitors)
+    // Public shop data
     match /productImages/{docId} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if true;
     }
 
     match /customProducts/{docId} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if true;
     }
 
-    // Operational data should stay protected
+    // Public submissions + admin dashboard operations
     match /waitlist/{docId} {
       allow create: if true;
-      allow read, update, delete: if request.auth != null;
+      allow read, update, delete: if true;
     }
 
     match /caregiverApplications/{docId} {
       allow create: if true;
-      allow read, update, delete: if request.auth != null;
-    }
-
-    match /certifiedCaregivers/{docId} {
-      allow read: if true;
-      allow write: if request.auth != null;
+      allow read, update, delete: if true;
     }
 
     match /contacts/{docId} {
       allow create: if true;
-      allow read, update, delete: if request.auth != null;
+      allow read, update, delete: if true;
     }
 
     match /orders/{docId} {
       allow create: if true;
-      allow read, update, delete: if request.auth != null;
+      allow read, update, delete: if true;
+    }
+
+    match /certifiedCaregivers/{docId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }
@@ -227,11 +230,11 @@ service cloud.firestore {
 
 Release checklist:
 
-1. Verify Firestore rules allow `read` on `productImages` and `customProducts`.
-2. If enabled, verify Firebase `Anonymous` auth provider is configured correctly.
-3. Open `/shop` in a private window and confirm products render without admin login.
-4. Confirm admin-only collections remain protected for unauthenticated users.
-5. Deploy rules from `firestore.rules` using `npm run deploy:rules`.
+1. Run `npm run firebase:whoami` to confirm CLI login state.
+2. Run `npm run firebase:use` to select `live-care-app`.
+3. Run `npm run deploy:rules` after any rule updates.
+4. Run `npm run firebase:repair` if admin suddenly shows permissions errors.
+5. Open `/admin` and `/shop` in a private window to verify reads/writes.
 
 ---
 
