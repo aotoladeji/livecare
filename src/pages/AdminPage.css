@@ -129,7 +129,29 @@
   padding: 14px 12px;
   display: flex;
   flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+}
+
+.adm-nav-group {
+  display: flex;
+  flex-direction: column;
   gap: 4px;
+}
+
+.adm-nav-group:not(:first-child) {
+  padding-top: 10px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+.adm-nav-group__label {
+  margin: 0;
+  padding: 0 10px 4px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.45);
 }
 
 .adm-nav-item {

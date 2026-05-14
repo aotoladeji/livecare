@@ -497,21 +497,47 @@ export default function AdminPage() {
     );
   }
 
-  const NAV_ITEMS = [
-    { id: 'overview',    icon: '📊', label: 'Overview' },
-    { id: 'live-monitoring', icon: '🟢', label: 'Live Monitoring', badge: liveSessions.length },
-    { id: 'quality-review', icon: '🧪', label: 'Quality Review' },
-    { id: 'user-management', icon: '👥', label: 'User Management', badge: userManagement.length },
-    { id: 'session-monitoring', icon: '🎯', label: 'Session Monitoring', badge: liveSessions.length },
-    { id: 'incident-handling', icon: '🚨', label: 'Incident Handling', badge: incidentReports.length },
-    { id: 'waitlist',    icon: '📋', label: 'Waitlist', badge: waitlist.length },
-    { id: 'contacts',    icon: '💬', label: 'Contact Inquiries', badge: contacts.length },
-    { id: 'orders',      icon: '🛒', label: 'Orders', badge: orders.length },
-    { id: 'cg-apps',     icon: '👤', label: 'CG Applications', badge: caregiverApplications.length },
-    { id: 'certified',   icon: '🏅', label: 'Certified Caregivers', badge: certifiedCaregivers.length },
-    { id: 'add-product', icon: '➕', label: 'Add Shop Item' },
-    { id: 'images',      icon: '🖼️', label: 'Product Images', badge: products.length },
+  const NAV_GROUPS = [
+    {
+      id: 'operations',
+      label: 'Operations',
+      items: [
+        { id: 'overview', icon: '📊', label: 'Overview' },
+        { id: 'live-monitoring', icon: '🟢', label: 'Live Monitoring', badge: liveSessions.length },
+        { id: 'incident-handling', icon: '🚨', label: 'Incident Handling', badge: incidentReports.length },
+        { id: 'session-monitoring', icon: '🎯', label: 'Session Monitoring', badge: liveSessions.length },
+        { id: 'quality-review', icon: '🧪', label: 'Quality Review' },
+      ],
+    },
+    {
+      id: 'pipeline',
+      label: 'Leads & Requests',
+      items: [
+        { id: 'orders', icon: '🛒', label: 'Orders', badge: orders.length },
+        { id: 'waitlist', icon: '📋', label: 'Waitlist', badge: waitlist.length },
+        { id: 'contacts', icon: '💬', label: 'Contact Inquiries', badge: contacts.length },
+      ],
+    },
+    {
+      id: 'care-team',
+      label: 'Care Team',
+      items: [
+        { id: 'cg-apps', icon: '👤', label: 'CG Applications', badge: caregiverApplications.length },
+        { id: 'certified', icon: '🏅', label: 'Certified Caregivers', badge: certifiedCaregivers.length },
+        { id: 'user-management', icon: '👥', label: 'User Management', badge: userManagement.length },
+      ],
+    },
+    {
+      id: 'catalog',
+      label: 'Shop Catalog',
+      items: [
+        { id: 'images', icon: '🖼️', label: 'Product Images', badge: products.length },
+        { id: 'add-product', icon: '➕', label: 'Add Shop Item' },
+      ],
+    },
   ];
+
+  const NAV_ITEMS = NAV_GROUPS.flatMap(group => group.items);
 
   const navTo = (id) => { setActiveSection(id); setSidebarOpen(false); };
 
@@ -528,16 +554,21 @@ export default function AdminPage() {
         </div>
 
         <nav className="adm-sidebar__nav">
-          {NAV_ITEMS.map(item => (
-            <button
-              key={item.id}
-              className={`adm-nav-item ${activeSection === item.id ? 'adm-nav-item--active' : ''}`}
-              onClick={() => navTo(item.id)}
-            >
-              <span className="adm-nav-item__icon">{item.icon}</span>
-              <span className="adm-nav-item__label">{item.label}</span>
-              {item.badge > 0 && <span className="adm-nav-item__badge">{item.badge}</span>}
-            </button>
+          {NAV_GROUPS.map(group => (
+            <div key={group.id} className="adm-nav-group">
+              <p className="adm-nav-group__label">{group.label}</p>
+              {group.items.map(item => (
+                <button
+                  key={item.id}
+                  className={`adm-nav-item ${activeSection === item.id ? 'adm-nav-item--active' : ''}`}
+                  onClick={() => navTo(item.id)}
+                >
+                  <span className="adm-nav-item__icon">{item.icon}</span>
+                  <span className="adm-nav-item__label">{item.label}</span>
+                  {item.badge > 0 && <span className="adm-nav-item__badge">{item.badge}</span>}
+                </button>
+              ))}
+            </div>
           ))}
         </nav>
 
